@@ -1,10 +1,12 @@
 import Link from 'next/link'
 import LocalTime from '@/components/local-time'
 import type { Match } from '@/types'
+import type { YouTubeClip } from '@/lib/youtube'
 
 interface Props {
   match: Match
   showBetLink?: boolean
+  clips?: YouTubeClip[]
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -15,7 +17,7 @@ const STATUS_LABEL: Record<string, string> = {
   CANCELLED: 'Cancelled',
 }
 
-export default function MatchCard({ match, showBetLink }: Props) {
+export default function MatchCard({ match, showBetLink, clips }: Props) {
   const isLive = match.status === 'IN_PLAY' || match.status === 'PAUSED'
   const isFinished = match.status === 'FINISHED'
   const hasScore = isLive || isFinished
@@ -63,6 +65,24 @@ export default function MatchCard({ match, showBetLink }: Props) {
           bold={awayWon}
         />
       </div>
+
+      {/* Video clips */}
+      {clips && clips.length > 0 && (
+        <div className="border-t border-slate-700 pt-2 space-y-1">
+          {clips.map((clip) => (
+            <a
+              key={clip.id}
+              href={clip.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-red-400 transition-colors truncate"
+            >
+              <span className="text-red-500 flex-shrink-0">▶</span>
+              <span className="truncate">{clip.title.split(' | ')[0]}</span>
+            </a>
+          ))}
+        </div>
+      )}
 
       {/* Bet link */}
       {showBetLink && !isFinished && match.status !== 'POSTPONED' && match.status !== 'CANCELLED' && (
