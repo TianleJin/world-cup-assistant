@@ -69,6 +69,7 @@ export default async function AccountPage() {
             Place a bet →
           </Link>
         </div>
+        <p className="text-xs text-slate-500 mb-3">Bets are settled once daily at 6 am UTC. Results may take up to 24 hours to reflect.</p>
 
         {pending.length === 0 ? (
           <p className="text-slate-400 text-sm">No pending bets.</p>

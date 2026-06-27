@@ -101,19 +101,24 @@ function TeamRow({
   showScore,
   bold,
 }: {
-  name: string
-  crest: string
+  name: string | null
+  crest: string | null
   score: number | null
   showScore: boolean
   bold: boolean
 }) {
+  const displayName = name ?? 'TBD'
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2 min-w-0">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={crest} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
-        <span className={`text-sm truncate ${bold ? 'font-bold text-white' : 'text-slate-200'}`}>
-          {name}
+        {crest ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={crest} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
+        ) : (
+          <span className="w-5 h-5 rounded-full bg-slate-600 flex-shrink-0" />
+        )}
+        <span className={`text-sm truncate ${bold ? 'font-bold text-white' : !name ? 'text-slate-500' : 'text-slate-200'}`}>
+          {displayName}
         </span>
       </div>
       {showScore && (

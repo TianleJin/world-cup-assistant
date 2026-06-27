@@ -48,18 +48,18 @@ export default async function Dashboard() {
       {/* Portfolio widget — logged-in users only */}
       {user && balance !== null && (
         <section className="bg-slate-800 border border-slate-700 rounded-xl p-4">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-6">
-              <div>
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0 flex-1 flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex-shrink-0">
                 <div className="text-xs text-slate-400 mb-0.5">Balance</div>
                 <div className="text-xl font-bold text-green-400">
                   ${balance.toLocaleString('en-AU', { minimumFractionDigits: 2 })}
                 </div>
               </div>
               {recentBets.length > 0 && (
-                <div>
-                  <div className="text-xs text-slate-400 mb-0.5">Recent bets</div>
-                  <div className="flex gap-2">
+                <div className="min-w-0">
+                  <div className="text-xs text-slate-400 mb-1">Recent bets</div>
+                  <div className="flex flex-wrap gap-2">
                     {recentBets.map((b) => (
                       <span
                         key={b.id}
@@ -78,7 +78,7 @@ export default async function Dashboard() {
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center items-end gap-2 flex-shrink-0">
               {pendingCount > 0 && (
                 <span className="text-xs text-amber-400 bg-amber-900/30 border border-amber-800 px-2.5 py-1 rounded-full">
                   {pendingCount} pending

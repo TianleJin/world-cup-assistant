@@ -49,9 +49,10 @@ export async function getFifaChannelVideos(): Promise<YouTubeClip[]> {
 
 export function findMatchClips(
   clips: YouTubeClip[],
-  homeTeam: string,
-  awayTeam: string
+  homeTeam: string | null,
+  awayTeam: string | null
 ): YouTubeClip[] {
+  if (!homeTeam || !awayTeam) return []
   const homeParts = normalizeTeamName(homeTeam).split(' ').filter(Boolean)
   const awayParts = normalizeTeamName(awayTeam).split(' ').filter(Boolean)
 

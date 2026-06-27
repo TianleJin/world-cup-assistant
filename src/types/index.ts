@@ -1,8 +1,8 @@
 export interface Team {
-  id: number
-  name: string
-  shortName: string
-  crest: string
+  id: number | null
+  name: string | null
+  shortName: string | null
+  crest: string | null
 }
 
 export interface Match {
