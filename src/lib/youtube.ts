@@ -1,6 +1,6 @@
 import { normalizeTeamName } from '@/lib/team-utils'
 
-const CHANNEL_ID = 'UCpcTrCXblq78GZrTUTLWeBw'
+const PLAYLIST_ID = 'PLBRLtDhTHh5o'
 
 export interface YouTubeClip {
   id: string
@@ -11,7 +11,7 @@ export interface YouTubeClip {
 
 export async function getFifaChannelVideos(): Promise<YouTubeClip[]> {
   const res = await fetch(
-    `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`,
+    `https://www.youtube.com/feeds/videos.xml?playlist_id=${PLAYLIST_ID}`,
     { next: { revalidate: 900 } }
   )
   if (!res.ok) return []

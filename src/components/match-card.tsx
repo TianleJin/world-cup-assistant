@@ -66,21 +66,18 @@ export default function MatchCard({ match, showBetLink, clips }: Props) {
         />
       </div>
 
-      {/* Video clips */}
+      {/* Match highlight */}
       {clips && clips.length > 0 && (
-        <div className="border-t border-slate-700 pt-2 space-y-1">
-          {clips.map((clip) => (
-            <a
-              key={clip.id}
-              href={clip.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-red-400 transition-colors truncate"
-            >
-              <span className="text-red-500 flex-shrink-0">▶</span>
-              <span className="truncate">{clip.title.split(' | ')[0]}</span>
-            </a>
-          ))}
+        <div className="border-t border-slate-700 pt-2">
+          <a
+            href={clips[0].url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-red-400 transition-colors"
+          >
+            <span className="text-red-500 flex-shrink-0">▶</span>
+            <span>Match Highlights</span>
+          </a>
         </div>
       )}
 
