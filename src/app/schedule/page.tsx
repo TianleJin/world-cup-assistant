@@ -5,7 +5,10 @@ import type { Match } from '@/types'
 export const revalidate = 300
 
 export default async function SchedulePage() {
-  const matches = await getMatches('TIMED,SCHEDULED')
+  const cutoff = Date.now() - 2 * 60 * 60 * 1000
+  const matches = (await getMatches('TIMED,SCHEDULED')).filter(
+    (m: Match) => new Date(m.utcDate).getTime() > cutoff
+  )
   const sorted = [...matches].sort(
     (a: Match, b: Match) => new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime()
   )

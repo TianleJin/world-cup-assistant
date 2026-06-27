@@ -11,28 +11,16 @@ export const dynamic = 'force-dynamic'
 
 const STAGE_LABELS: Record<string, string> = {
   GROUP_STAGE: 'Group Stage',
-  ROUND_OF_32: 'Round of 32',
-  ROUND_OF_16: 'Round of 16',
+  LAST_32: 'Round of 32',
+  LAST_16: 'Round of 16',
   QUARTER_FINALS: 'Quarter-final',
   SEMI_FINALS: 'Semi-final',
   THIRD_PLACE: 'Third Place',
   FINAL: 'Final',
 }
 
-// Fallback: infer stage from known World Cup 2026 schedule dates
-function inferStageFromDate(commenceTime: string): string {
-  const d = new Date(commenceTime).getTime()
-  if (d < new Date('2026-06-28').getTime()) return 'Group Stage'
-  if (d < new Date('2026-07-03').getTime()) return 'Round of 32'
-  if (d < new Date('2026-07-08').getTime()) return 'Round of 16'
-  if (d < new Date('2026-07-12').getTime()) return 'Quarter-final'
-  if (d < new Date('2026-07-17').getTime()) return 'Semi-final'
-  if (d < new Date('2026-07-19').getTime()) return 'Third Place'
-  return 'Final'
-}
-
-function getStageLabel(match: Match | undefined, commenceTime: string): string {
-  if (!match) return inferStageFromDate(commenceTime)
+function getStageLabel(match: Match | undefined): string | null {
+  if (!match) return null
   const stage = STAGE_LABELS[match.stage] ?? match.stage.replace(/_/g, ' ')
   if (match.group) return `${stage} · ${match.group.replace('GROUP_', 'Group ')}`
   return stage
@@ -53,7 +41,7 @@ function findFixture(o: OddsRow, matches: Match[]): Match | undefined {
 export default async function OddsPage() {
   const [odds, matches, supabase] = await Promise.all([
     getWorldCupOdds(),
-    getMatches('TIMED,SCHEDULED'),
+    getMatches(),
     createClient(),
   ])
 
@@ -124,13 +112,13 @@ function OddsCard({
   fixture: Match | undefined
   user: { id: string } | null
 }) {
-  const stageLabel = getStageLabel(fixture, odds.commence_time)
+  const stageLabel = getStageLabel(fixture)
 
   return (
     <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 space-y-4">
       {/* Stage + kickoff */}
       <div className="flex items-center justify-between text-xs">
-        <span className="text-green-500 font-medium">{stageLabel}</span>
+        {stageLabel && <span className="text-green-500 font-medium">{stageLabel}</span>}
         <span className="text-slate-400">
           <LocalTime iso={odds.commence_time} options={{ month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }} />
         </span>
