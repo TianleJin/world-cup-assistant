@@ -19,7 +19,6 @@ export default function MatchCard({ match, showBetLink }: Props) {
   const isLive = match.status === 'IN_PLAY' || match.status === 'PAUSED'
   const isFinished = match.status === 'FINISHED'
   const hasScore = isLive || isFinished
-  const kickoff = new Date(match.utcDate)
 
   const homeWon = match.score.winner === 'HOME_TEAM'
   const awayWon = match.score.winner === 'AWAY_TEAM'

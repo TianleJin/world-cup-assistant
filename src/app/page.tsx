@@ -25,7 +25,7 @@ export default async function Dashboard() {
 
   const balance = profileResult.data?.wallet_balance as number | null
   const recentBets: Bet[] = betsResult.data ?? []
-  const pendingCount = (pendingResult as any).count ?? 0
+  const pendingCount = (pendingResult as { count: number | null }).count ?? 0
 
   const todayStr = today()
   const liveMatches = matches.filter((m: Match) => m.status === 'IN_PLAY' || m.status === 'PAUSED')

@@ -78,7 +78,7 @@ export async function cancelBetAction(formData: FormData): Promise<void> {
 
   const betId = formData.get('bet_id') as string
 
-  const { error } = await supabase.rpc('cancel_bet', {
+  await supabase.rpc('cancel_bet', {
     p_bet_id: betId,
     p_user_id: user.id,
   })

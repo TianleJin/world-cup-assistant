@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getMatches } from '@/lib/football-data'
 import { teamsMatch } from '@/lib/team-utils'
-import type { Match, Bet } from '@/types'
+import type { Match } from '@/types'
 
 // Dev-only — blocked in production
 export async function GET(request: NextRequest) {
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
     .eq('id', userId)
 
   // 4. Run settlement logic against each inserted bet
-  const report: any[] = []
+  const report: { selection: string; status?: string; payout?: number; settle_error?: string | null; error?: string }[] = []
 
   for (const betRow of inserted ?? []) {
     const fixture = finished.find((m: Match) => {

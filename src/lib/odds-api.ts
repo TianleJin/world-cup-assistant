@@ -33,12 +33,12 @@ export async function getWorldCupOdds(): Promise<OddsRow[]> {
     return cached ?? []
   }
 
-  const events = (await res.json()) as any[]
+  const events = (await res.json()) as { id: string; home_team: string; away_team: string; commence_time: string; bookmakers: { key: string; markets: { key: string; outcomes: { name: string; price: number }[] }[] }[] }[]
   const now = new Date().toISOString()
 
   const rows: OddsRow[] = events.map((e) => {
     const bookmaker = e.bookmakers?.[0]
-    const h2h = bookmaker?.markets?.find((m: any) => m.key === 'h2h')
+    const h2h = bookmaker?.markets?.find((m: { key: string }) => m.key === 'h2h')
     const outcomes: { name: string; price: number }[] = h2h?.outcomes ?? []
 
     return {

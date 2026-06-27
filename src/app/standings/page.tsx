@@ -58,7 +58,7 @@ export default async function StandingsPage() {
                 </tr>
               </thead>
               <tbody>
-                {scorers.slice(0, 10).map((s: any, i: number) => (
+                {scorers.slice(0, 10).map((s: { player: { id: number; name: string }; team: { crest: string; shortName?: string; name: string }; goals: number; assists: number | null }, i: number) => (
                   <tr key={s.player.id} className="border-b border-slate-700/50 hover:bg-slate-700/30">
                     <td className="px-4 py-3 text-slate-400">{i + 1}</td>
                     <td className="px-4 py-3 font-medium">{s.player.name}</td>

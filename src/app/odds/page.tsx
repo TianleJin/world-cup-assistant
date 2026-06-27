@@ -122,9 +122,8 @@ function OddsCard({
 }: {
   odds: OddsRow
   fixture: Match | undefined
-  user: any
+  user: { id: string } | null
 }) {
-  const kickoff = new Date(odds.commence_time)
   const stageLabel = getStageLabel(fixture, odds.commence_time)
 
   return (
@@ -211,7 +210,7 @@ function OddsButton({
   price: number | null
   matchId: string
   selection: string
-  user: any
+  user: { id: string } | null
 }) {
   if (!price) {
     return (
