@@ -1,15 +1,11 @@
 import { getMatches } from '@/lib/football-data'
 import { getWorldCupNews } from '@/lib/news-api'
 import { createClient } from '@/lib/supabase/server'
-import MatchCard from '@/components/match-card'
+import HomeMatchSection from '@/components/home-match-section'
 import Link from 'next/link'
-import type { Match, NewsArticle, Bet } from '@/types'
+import type { NewsArticle, Bet } from '@/types'
 
 export const dynamic = 'force-dynamic'
-
-function today() {
-  return new Date().toISOString().split('T')[0]
-}
 
 export default async function Dashboard() {
   const supabase = await createClient()
@@ -27,19 +23,6 @@ export default async function Dashboard() {
   const recentBets: Bet[] = betsResult.data ?? []
   const pendingCount = (pendingResult as { count: number | null }).count ?? 0
 
-  const todayStr = today()
-  const liveMatches = matches.filter((m: Match) => m.status === 'IN_PLAY' || m.status === 'PAUSED')
-  const todayMatches = matches.filter((m: Match) => m.utcDate.startsWith(todayStr))
-  const recentResults = matches
-    .filter((m: Match) => m.status === 'FINISHED')
-    .sort((a: Match, b: Match) => new Date(b.utcDate).getTime() - new Date(a.utcDate).getTime())
-    .slice(0, 6)
-
-  const featuredMatches = liveMatches.length > 0
-    ? liveMatches
-    : todayMatches.length > 0
-    ? todayMatches
-    : recentResults
 
   const news = newsResult.articles.slice(0, 6)
 
@@ -103,36 +86,8 @@ export default async function Dashboard() {
         </section>
       )}
 
-      {/* Live / today / recent */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            {liveMatches.length > 0 ? (
-              <>
-                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                Live Now
-              </>
-            ) : todayMatches.length > 0 ? (
-              "Today's Matches"
-            ) : (
-              'Recent Results'
-            )}
-          </h2>
-          <Link href="/results" className="text-sm text-green-500 hover:text-green-400">
-            All results →
-          </Link>
-        </div>
-
-        {featuredMatches.length > 0 ? (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredMatches.map((m: Match) => (
-              <MatchCard key={m.id} match={m} showBetLink />
-            ))}
-          </div>
-        ) : (
-          <p className="text-slate-400 text-sm">No matches to display.</p>
-        )}
-      </section>
+      {/* Live / today / tomorrow / recent — grouped by local date */}
+      <HomeMatchSection matches={matches} />
 
       {/* Quick links */}
       <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
