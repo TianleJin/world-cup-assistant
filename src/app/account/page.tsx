@@ -1,0 +1,193 @@
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import Link from 'next/link'
+import { cancelBetAction } from '@/app/actions'
+import LocalTime from '@/components/local-time'
+import type { Bet } from '@/types'
+
+export const dynamic = 'force-dynamic'
+
+export default async function AccountPage() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) redirect('/login')
+
+  const [profileResult, betsResult] = await Promise.all([
+    supabase.from('user_profiles').select('*').eq('id', user.id).single(),
+    supabase
+      .from('bets')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('placed_at', { ascending: false }),
+  ])
+
+  const profile = profileResult.data
+  const bets: Bet[] = betsResult.data ?? []
+  const balance = (profile?.wallet_balance as number) ?? 0
+
+  const pending = bets.filter((b) => b.status === 'pending')
+  const settled = bets.filter((b) => b.status !== 'pending')
+
+  // P&L calculations (void/cancelled bets excluded — stake was refunded)
+  const nonVoid = settled.filter((b) => b.status !== 'void')
+  const totalStaked = nonVoid.reduce((sum, b) => sum + b.stake, 0)
+  const totalReturned = nonVoid.reduce((sum, b) => sum + (b.payout ?? 0), 0)
+  const netPnl = totalReturned - totalStaked
+  const wonCount = settled.filter((b) => b.status === 'won').length
+  const settledCount = settled.filter((b) => b.status !== 'void').length
+
+  return (
+    <div className="max-w-3xl mx-auto space-y-8">
+      <h1 className="text-2xl font-bold">My Account</h1>
+
+      {/* Balance & P&L summary */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatCard label="Balance" value={`$${balance.toLocaleString('en-AU', { minimumFractionDigits: 2 })}`} accent />
+        <StatCard
+          label="Net P&L"
+          value={`${netPnl >= 0 ? '+' : ''}$${netPnl.toFixed(2)}`}
+          positive={netPnl >= 0}
+          negative={netPnl < 0}
+        />
+        <StatCard label="Bets Won" value={settledCount > 0 ? `${wonCount}/${settledCount}` : '—'} />
+        <StatCard label="Total Staked" value={totalStaked > 0 ? `$${totalStaked.toFixed(2)}` : '—'} />
+      </div>
+
+      {/* Pending bets */}
+      <section>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold">
+            Pending Bets
+            {pending.length > 0 && (
+              <span className="ml-2 text-sm font-normal text-slate-400">({pending.length})</span>
+            )}
+          </h2>
+          <Link href="/odds" className="text-sm text-green-500 hover:text-green-400">
+            Place a bet →
+          </Link>
+        </div>
+
+        {pending.length === 0 ? (
+          <p className="text-slate-400 text-sm">No pending bets.</p>
+        ) : (
+          <div className="space-y-2">
+            {pending.map((b) => <BetRow key={b.id} bet={b} />)}
+          </div>
+        )}
+      </section>
+
+      {/* Settled bets */}
+      <section>
+        <h2 className="text-lg font-semibold mb-3">
+          Settled Bets
+          {settled.length > 0 && (
+            <span className="ml-2 text-sm font-normal text-slate-400">({settled.length})</span>
+          )}
+        </h2>
+
+        {settled.length === 0 ? (
+          <p className="text-slate-400 text-sm">No settled bets yet.</p>
+        ) : (
+          <div className="space-y-2">
+            {settled.map((b) => <BetRow key={b.id} bet={b} />)}
+          </div>
+        )}
+      </section>
+    </div>
+  )
+}
+
+function StatCard({
+  label,
+  value,
+  accent,
+  positive,
+  negative,
+}: {
+  label: string
+  value: string
+  accent?: boolean
+  positive?: boolean
+  negative?: boolean
+}) {
+  const valueClass = accent
+    ? 'text-green-400'
+    : positive
+    ? 'text-green-400'
+    : negative
+    ? 'text-red-400'
+    : 'text-white'
+
+  return (
+    <div className="bg-slate-800 border border-slate-700 rounded-xl p-4">
+      <div className="text-xs text-slate-400 mb-1">{label}</div>
+      <div className={`text-lg font-bold ${valueClass}`}>{value}</div>
+    </div>
+  )
+}
+
+function BetRow({ bet }: { bet: Bet }) {
+  const selectionLabel =
+    bet.selection === 'home'
+      ? bet.home_team
+      : bet.selection === 'away'
+      ? bet.away_team
+      : 'Draw'
+
+  const statusClass = {
+    pending: 'text-slate-400 bg-slate-700',
+    won: 'text-green-300 bg-green-900/50',
+    lost: 'text-red-300 bg-red-900/40',
+    void: 'text-slate-400 bg-slate-700',
+  }[bet.status]
+
+  const now = new Date()
+  const canCancel =
+    bet.status === 'pending' &&
+    (bet.commence_time
+      ? new Date(bet.commence_time) > now
+      : bet.match_date >= now.toISOString().split('T')[0])
+
+  return (
+    <div className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
+      <div className="min-w-0">
+        <div className="text-sm font-medium text-white">
+          {bet.home_team} vs {bet.away_team}
+        </div>
+        <div className="text-xs text-slate-400 mt-0.5">
+          {selectionLabel} @ {bet.odds.toFixed(2)} · ${bet.stake.toFixed(2)} stake ·{' '}
+          {new Date(bet.placed_at).toLocaleDateString()}
+          {bet.commence_time && (
+            <span className="ml-1">
+              · kicks off <LocalTime iso={bet.commence_time} />
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="flex items-center gap-2 flex-shrink-0">
+        {canCancel && (
+          <form action={cancelBetAction}>
+            <input type="hidden" name="bet_id" value={bet.id} />
+            <button
+              type="submit"
+              className="text-xs text-slate-400 hover:text-white border border-slate-600 hover:border-slate-400 px-2.5 py-1 rounded-md transition-colors"
+            >
+              Cancel
+            </button>
+          </form>
+        )}
+        <span className={`text-xs font-semibold px-2 py-1 rounded-md uppercase ${statusClass}`}>
+          {bet.status}
+        </span>
+        {bet.payout != null && bet.payout > 0 && bet.status !== 'void' && (
+          <div className="text-xs text-green-400">
+            +${bet.payout.toFixed(2)}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

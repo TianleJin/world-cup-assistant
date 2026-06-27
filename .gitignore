@@ -1,0 +1,25 @@
+# dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# environment variables — never commit these
+.env
+.env.local
+.env.*.local
+
+# Vercel
+.vercel/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# misc
+.DS_Store
+Thumbs.db
