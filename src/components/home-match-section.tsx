@@ -4,12 +4,13 @@ import { useState, useEffect } from 'react'
 import MatchCard from '@/components/match-card'
 import Link from 'next/link'
 import type { Match } from '@/types'
+import type { YouTubeClip } from '@/lib/youtube'
 
 function localDateKey(date: Date) {
   return date.toLocaleDateString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit' })
 }
 
-export default function HomeMatchSection({ matches }: { matches: Match[] }) {
+export default function HomeMatchSection({ matches, highlights }: { matches: Match[]; highlights?: Record<number, YouTubeClip[]> }) {
   const [ready, setReady] = useState(false)
   const [live, setLive] = useState<Match[]>([])
   const [today, setToday] = useState<Match[]>([])
@@ -58,7 +59,7 @@ export default function HomeMatchSection({ matches }: { matches: Match[] }) {
             Live Now
           </h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {live.map(m => <MatchCard key={m.id} match={m} showBetLink />)}
+            {live.map(m => <MatchCard key={m.id} match={m} showBetLink clips={highlights?.[m.id]} />)}
           </div>
         </section>
       )}
@@ -70,7 +71,7 @@ export default function HomeMatchSection({ matches }: { matches: Match[] }) {
             <Link href="/schedule" className="text-sm text-green-500 hover:text-green-400">Full schedule →</Link>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {today.map(m => <MatchCard key={m.id} match={m} showBetLink />)}
+            {today.map(m => <MatchCard key={m.id} match={m} showBetLink clips={highlights?.[m.id]} />)}
           </div>
         </section>
       )}
@@ -82,7 +83,7 @@ export default function HomeMatchSection({ matches }: { matches: Match[] }) {
             <Link href="/schedule" className="text-sm text-green-500 hover:text-green-400">Full schedule →</Link>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {tomorrow.slice(0, 6).map(m => <MatchCard key={m.id} match={m} showBetLink />)}
+            {tomorrow.slice(0, 6).map(m => <MatchCard key={m.id} match={m} showBetLink clips={highlights?.[m.id]} />)}
           </div>
         </section>
       )}
@@ -94,7 +95,7 @@ export default function HomeMatchSection({ matches }: { matches: Match[] }) {
             <Link href="/results" className="text-sm text-green-500 hover:text-green-400">All results →</Link>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {recent.map(m => <MatchCard key={m.id} match={m} />)}
+            {recent.map(m => <MatchCard key={m.id} match={m} clips={highlights?.[m.id]} />)}
           </div>
         </section>
       )}

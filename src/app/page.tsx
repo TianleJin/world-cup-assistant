@@ -1,9 +1,11 @@
 import { getMatches } from '@/lib/football-data'
 import { getWorldCupNews } from '@/lib/news-api'
+import { getFifaChannelVideos, findMatchClips } from '@/lib/youtube'
 import { createClient } from '@/lib/supabase/server'
 import HomeMatchSection from '@/components/home-match-section'
 import Link from 'next/link'
-import type { NewsArticle, Bet } from '@/types'
+import type { NewsArticle, Bet, Match } from '@/types'
+import type { YouTubeClip } from '@/lib/youtube'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,8 +13,9 @@ export default async function Dashboard() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const [matches, newsResult, profileResult, betsResult, pendingResult] = await Promise.all([
+  const [matches, clips, newsResult, profileResult, betsResult, pendingResult] = await Promise.all([
     getMatches(),
+    getFifaChannelVideos(),
     getWorldCupNews(1),
     user ? supabase.from('user_profiles').select('wallet_balance').eq('id', user.id).single() : Promise.resolve({ data: null }),
     user ? supabase.from('bets').select('*').eq('user_id', user.id).neq('status', 'void').order('placed_at', { ascending: false }).limit(3) : Promise.resolve({ data: null }),
@@ -22,6 +25,12 @@ export default async function Dashboard() {
   const balance = profileResult.data?.wallet_balance as number | null
   const recentBets: Bet[] = betsResult.data ?? []
   const pendingCount = (pendingResult as { count: number | null }).count ?? 0
+
+  const highlights: Record<number, YouTubeClip[]> = {}
+  for (const m of matches as Match[]) {
+    const found = findMatchClips(clips, m.homeTeam.name, m.awayTeam.name)
+    if (found.length > 0) highlights[m.id] = found
+  }
 
 
   const news = newsResult.articles.slice(0, 6)
@@ -87,7 +96,7 @@ export default async function Dashboard() {
       )}
 
       {/* Live / today / tomorrow / recent — grouped by local date */}
-      <HomeMatchSection matches={matches} />
+      <HomeMatchSection matches={matches} highlights={highlights} />
 
       {/* Quick links */}
       <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">

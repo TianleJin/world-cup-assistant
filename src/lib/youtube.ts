@@ -1,6 +1,6 @@
 import { normalizeTeamName } from '@/lib/team-utils'
 
-const PLAYLIST_ID = 'PLBRLtDhTHh5o'
+const PLAYLIST_ID = 'PLNuJDkj3zBvPVhoKC6Oq8j4w7AH9l-ejG'
 
 export interface YouTubeClip {
   id: string
@@ -10,28 +10,39 @@ export interface YouTubeClip {
 }
 
 export async function getFifaChannelVideos(): Promise<YouTubeClip[]> {
-  const res = await fetch(
-    `https://www.youtube.com/feeds/videos.xml?playlist_id=${PLAYLIST_ID}`,
-    { next: { revalidate: 900 } }
-  )
-  if (!res.ok) return []
+  const apiKey = process.env.YOUTUBE_API_KEY
+  if (!apiKey) return []
 
-  const xml = await res.text()
   const clips: YouTubeClip[] = []
+  let pageToken: string | undefined
 
-  for (const entry of xml.split('<entry>').slice(1)) {
-    const id = entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1]
-    const title = entry.match(/<media:title>([^<]+)<\/media:title>/)?.[1]
-    const thumbnail = entry.match(/<media:thumbnail url="([^"]+)"/)?.[1]
-    if (id && title) {
+  do {
+    const url = new URL('https://www.googleapis.com/youtube/v3/playlistItems')
+    url.searchParams.set('part', 'snippet')
+    url.searchParams.set('playlistId', PLAYLIST_ID)
+    url.searchParams.set('maxResults', '50')
+    url.searchParams.set('key', apiKey)
+    if (pageToken) url.searchParams.set('pageToken', pageToken)
+
+    const res = await fetch(url.toString(), { next: { revalidate: 900 } })
+    if (!res.ok) break
+
+    const data = await res.json()
+    for (const item of data.items ?? []) {
+      const snippet = item.snippet
+      const videoId = snippet?.resourceId?.videoId
+      const title = snippet?.title
+      if (!videoId || !title) continue
       clips.push({
-        id,
-        title: title.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>'),
-        thumbnailUrl: thumbnail ?? `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
-        url: `https://www.youtube.com/watch?v=${id}`,
+        id: videoId,
+        title,
+        thumbnailUrl: snippet.thumbnails?.high?.url ?? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+        url: `https://www.youtube.com/watch?v=${videoId}`,
       })
     }
-  }
+
+    pageToken = data.nextPageToken
+  } while (pageToken)
 
   return clips
 }
