@@ -38,6 +38,10 @@ export default function RegisterPage() {
     // If email confirmation is disabled in Supabase, the user is logged in immediately
     if (data.session) {
       window.location.href = '/'
+    } else if (data.user && data.user.identities?.length === 0) {
+      // Email already registered — Supabase fakes success to prevent enumeration
+      setError('An account with this email already exists.')
+      setLoading(false)
     } else {
       // Email confirmation required
       setDone(true)

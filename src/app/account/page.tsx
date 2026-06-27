@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cancelBetAction } from '@/app/actions'
 import LocalTime from '@/components/local-time'
+import SettingsSection from '@/components/settings-section'
 import type { Bet } from '@/types'
 
 export const dynamic = 'force-dynamic'
@@ -97,6 +98,8 @@ export default async function AccountPage() {
           </div>
         )}
       </section>
+
+      <SettingsSection />
     </div>
   )
 }

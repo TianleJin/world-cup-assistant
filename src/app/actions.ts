@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 
@@ -66,6 +67,54 @@ export async function placeBetAction(
   revalidatePath('/account')
   revalidatePath('/')
   redirect('/account')
+}
+
+export async function changePasswordAction(
+  _prev: { error?: string; success?: boolean } | null,
+  formData: FormData
+): Promise<{ error?: string; success?: boolean }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  const oldPassword = formData.get('old_password') as string
+  const newPassword = formData.get('new_password') as string
+  const confirmPassword = formData.get('confirm_password') as string
+
+  if (newPassword.length < 6) return { error: 'Password must be at least 6 characters.' }
+  if (newPassword !== confirmPassword) return { error: 'Passwords do not match.' }
+
+  const { error: authError } = await supabase.auth.signInWithPassword({
+    email: user.email!,
+    password: oldPassword,
+  })
+  if (authError) return { error: 'Current password is incorrect.' }
+
+  const { error } = await supabase.auth.updateUser({ password: newPassword })
+  if (error) return { error: error.message }
+
+  return { success: true }
+}
+
+export async function deleteAccountAction(
+  _prev: { error?: string } | null,
+  formData: FormData
+): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const password = formData.get('password') as string
+  const { error: authError } = await supabase.auth.signInWithPassword({
+    email: user.email!,
+    password,
+  })
+  if (authError) return { error: 'Incorrect password.' }
+
+  const admin = createAdminClient()
+  await admin.auth.admin.deleteUser(user.id)
+  await supabase.auth.signOut()
+  redirect('/')
 }
 
 export async function cancelBetAction(formData: FormData): Promise<void> {
