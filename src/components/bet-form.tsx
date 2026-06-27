@@ -92,13 +92,11 @@ export default function BetForm({ odds, balance, preselection }: Props) {
         <div className="relative">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
           <input
-            type="number"
+            type="text"
+            inputMode="numeric"
             name="stake"
             value={stake}
-            onChange={(e) => setStake(e.target.value)}
-            min="1"
-            max={balance}
-            step="1"
+            onChange={(e) => setStake(e.target.value.replace(/[^0-9.]/g, ''))}
             placeholder="0.00"
             className="w-full bg-slate-700 border border-slate-600 rounded-lg pl-7 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-green-500"
           />
