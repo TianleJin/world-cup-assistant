@@ -47,19 +47,23 @@ export async function GET(request: NextRequest) {
     if (!match) continue // Result not in yet
 
     const winner = match.score.winner
+    const homeGoals = match.score.fullTime.home
+    const awayGoals = match.score.fullTime.away
     let status: 'won' | 'lost' | 'void'
 
-    if (winner === null) {
-      // No result yet (shouldn't happen for FINISHED matches, but handle gracefully)
-      continue
-    } else if (
-      (bet.selection === 'home' && winner === 'HOME_TEAM') ||
-      (bet.selection === 'away' && winner === 'AWAY_TEAM') ||
-      (bet.selection === 'draw' && winner === 'DRAW')
-    ) {
-      status = 'won'
+    if (bet.selection === 'over' || bet.selection === 'under') {
+      if (homeGoals === null || awayGoals === null) continue
+      const totalGoals = homeGoals + awayGoals
+      status = (bet.selection === 'over' && totalGoals > 2.5) ||
+               (bet.selection === 'under' && totalGoals < 2.5) ? 'won' : 'lost'
     } else {
-      status = 'lost'
+      if (winner === null) continue
+      status =
+        (bet.selection === 'home' && winner === 'HOME_TEAM') ||
+        (bet.selection === 'away' && winner === 'AWAY_TEAM') ||
+        (bet.selection === 'draw' && winner === 'DRAW')
+          ? 'won'
+          : 'lost'
     }
 
     const payout = status === 'won' ? bet.stake * bet.odds : 0

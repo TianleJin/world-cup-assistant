@@ -30,6 +30,7 @@ export default async function AccountPage() {
   const balance = (profile?.wallet_balance as number) ?? 0
 
   const pending = bets.filter((b) => b.status === 'pending')
+  const lockedAmount = pending.reduce((sum, b) => sum + b.stake, 0)
   const settled = bets.filter((b) => b.status !== 'pending')
 
   // P&L calculations (void/cancelled bets excluded — stake was refunded)
@@ -46,7 +47,12 @@ export default async function AccountPage() {
 
       {/* Balance & P&L summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <StatCard label="Balance" value={`$${balance.toLocaleString('en-AU', { minimumFractionDigits: 2 })}`} accent />
+        <StatCard
+          label="Balance"
+          value={`$${balance.toLocaleString('en-AU', { minimumFractionDigits: 2 })}`}
+          sub={lockedAmount > 0 ? `$${lockedAmount.toFixed(2)} in ${pending.length} pending bet${pending.length !== 1 ? 's' : ''}` : undefined}
+          accent
+        />
         <StatCard
           label="Net P&L"
           value={`${netPnl >= 0 ? '+' : ''}$${netPnl.toFixed(2)}`}
@@ -107,12 +113,14 @@ export default async function AccountPage() {
 function StatCard({
   label,
   value,
+  sub,
   accent,
   positive,
   negative,
 }: {
   label: string
   value: string
+  sub?: string
   accent?: boolean
   positive?: boolean
   negative?: boolean
@@ -129,17 +137,18 @@ function StatCard({
     <div className="bg-slate-800 border border-slate-700 rounded-xl p-4">
       <div className="text-xs text-slate-400 mb-1">{label}</div>
       <div className={`text-lg font-bold ${valueClass}`}>{value}</div>
+      {sub && <div className="text-xs text-slate-500 mt-0.5">{sub}</div>}
     </div>
   )
 }
 
 function BetRow({ bet }: { bet: Bet }) {
   const selectionLabel =
-    bet.selection === 'home'
-      ? bet.home_team
-      : bet.selection === 'away'
-      ? bet.away_team
-      : 'Draw'
+    bet.selection === 'home' ? bet.home_team
+    : bet.selection === 'away' ? bet.away_team
+    : bet.selection === 'draw' ? 'Draw'
+    : bet.selection === 'over' ? 'Over 2.5'
+    : 'Under 2.5'
 
   const statusClass = {
     pending: 'text-slate-400 bg-slate-700',

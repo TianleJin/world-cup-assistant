@@ -131,7 +131,7 @@ function OddsCard({
         <TeamRow name={odds.away_team} />
       </div>
 
-      {/* Odds buttons */}
+      {/* Match winner buttons */}
       <div className={`grid gap-2 ${odds.draw_odds ? 'grid-cols-3' : 'grid-cols-2'}`}>
         <OddsButton
           label={shortName(odds.home_team)}
@@ -160,6 +160,31 @@ function OddsCard({
           user={user}
         />
       </div>
+
+      {/* Over/under buttons */}
+      {(odds.over_odds || odds.under_odds) && (
+        <div>
+          <div className="text-xs text-slate-500 mb-1.5">Total goals</div>
+          <div className="grid grid-cols-2 gap-2">
+            <OddsButton
+              label="Over 2.5"
+              sublabel="O"
+              price={odds.over_odds}
+              matchId={odds.match_id}
+              selection="over"
+              user={user}
+            />
+            <OddsButton
+              label="Under 2.5"
+              sublabel="U"
+              price={odds.under_odds}
+              matchId={odds.match_id}
+              selection="under"
+              user={user}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

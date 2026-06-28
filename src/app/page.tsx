@@ -18,13 +18,24 @@ export default async function Dashboard() {
     getFifaChannelVideos(),
     getWorldCupNews(1),
     user ? supabase.from('user_profiles').select('wallet_balance').eq('id', user.id).single() : Promise.resolve({ data: null }),
-    user ? supabase.from('bets').select('*').eq('user_id', user.id).neq('status', 'void').order('placed_at', { ascending: false }).limit(3) : Promise.resolve({ data: null }),
-    user ? supabase.from('bets').select('id', { count: 'exact' }).eq('user_id', user.id).eq('status', 'pending') : Promise.resolve({ count: 0 }),
+    user ? supabase.from('bets').select('*').eq('user_id', user.id).neq('status', 'void').order('placed_at', { ascending: false }).limit(10) : Promise.resolve({ data: null }),
+    user ? supabase.from('bets').select('stake').eq('user_id', user.id).eq('status', 'pending') : Promise.resolve({ data: [] }),
   ])
 
   const balance = profileResult.data?.wallet_balance as number | null
-  const recentBets: Bet[] = betsResult.data ?? []
-  const pendingCount = (pendingResult as { count: number | null }).count ?? 0
+  const seen = new Set<string>()
+  const recentBets: Bet[] = []
+  for (const b of (betsResult.data ?? []) as Bet[]) {
+    const key = b.odds_match_id ?? `${b.home_team}|${b.away_team}`
+    if (!seen.has(key)) {
+      seen.add(key)
+      recentBets.push(b)
+      if (recentBets.length === 3) break
+    }
+  }
+  const pendingBets = (pendingResult as { data: { stake: number }[] | null }).data ?? []
+  const pendingCount = pendingBets.length
+  const lockedAmount = pendingBets.reduce((sum, b) => sum + b.stake, 0)
 
   const highlights: Record<number, YouTubeClip[]> = {}
   for (const m of matches as Match[]) {
@@ -55,6 +66,9 @@ export default async function Dashboard() {
                 <div className="text-xl font-bold text-green-400">
                   ${balance.toLocaleString('en-AU', { minimumFractionDigits: 2 })}
                 </div>
+                {lockedAmount > 0 && (
+                  <div className="text-xs text-slate-500 mt-0.5">${lockedAmount.toFixed(2)} in bets</div>
+                )}
               </div>
               {recentBets.length > 0 && (
                 <div className="min-w-0">

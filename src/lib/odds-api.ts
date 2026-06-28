@@ -22,8 +22,7 @@ export async function getWorldCupOdds(): Promise<OddsRow[]> {
   const params = new URLSearchParams({
     apiKey: process.env.ODDS_API_KEY!,
     regions: 'au',
-    markets: 'h2h',
-    bookmakers: 'sportsbet',
+    markets: 'h2h,totals',
     dateFormat: 'iso',
   })
 
@@ -37,19 +36,27 @@ export async function getWorldCupOdds(): Promise<OddsRow[]> {
   const now = new Date().toISOString()
 
   const rows: OddsRow[] = events.map((e) => {
-    const bookmaker = e.bookmakers?.[0]
-    const h2h = bookmaker?.markets?.find((m: { key: string }) => m.key === 'h2h')
-    const outcomes: { name: string; price: number }[] = h2h?.outcomes ?? []
+    const bookmakers: { key: string; markets: { key: string; outcomes: { name: string; price: number }[] }[] }[] = e.bookmakers ?? []
+    // Prefer Sportsbet for h2h, fall back to first available
+    const h2hBookmaker = bookmakers.find((b) => b.key === 'sportsbet') ?? bookmakers[0]
+    const h2h = h2hBookmaker?.markets?.find((m) => m.key === 'h2h')
+    const h2hOutcomes = h2h?.outcomes ?? []
+    // Use any bookmaker that has totals (Sportsbet often doesn't offer this market)
+    const totalsBookmaker = bookmakers.find((b) => b.markets?.some((m) => m.key === 'totals'))
+    const totals = totalsBookmaker?.markets?.find((m) => m.key === 'totals')
+    const totalsOutcomes = totals?.outcomes ?? []
 
     return {
       match_id: e.id,
       home_team: e.home_team,
       away_team: e.away_team,
       commence_time: e.commence_time,
-      home_odds: outcomes.find((o) => o.name === e.home_team)?.price ?? null,
-      away_odds: outcomes.find((o) => o.name === e.away_team)?.price ?? null,
-      draw_odds: outcomes.find((o) => o.name === 'Draw')?.price ?? null,
-      bookmaker: bookmaker?.key ?? 'sportsbet',
+      home_odds: h2hOutcomes.find((o) => o.name === e.home_team)?.price ?? null,
+      away_odds: h2hOutcomes.find((o) => o.name === e.away_team)?.price ?? null,
+      draw_odds: h2hOutcomes.find((o) => o.name === 'Draw')?.price ?? null,
+      over_odds: totalsOutcomes.find((o) => o.name === 'Over')?.price ?? null,
+      under_odds: totalsOutcomes.find((o) => o.name === 'Under')?.price ?? null,
+      bookmaker: h2hBookmaker?.key ?? 'sportsbet',
       fetched_at: now,
     }
   })

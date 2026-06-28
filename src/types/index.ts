@@ -59,6 +59,8 @@ export interface OddsRow {
   home_odds: number | null
   draw_odds: number | null
   away_odds: number | null
+  over_odds: number | null
+  under_odds: number | null
   bookmaker: string
   fetched_at: string
 }
@@ -70,7 +72,7 @@ export interface Bet {
   home_team: string
   away_team: string
   match_date: string
-  selection: 'home' | 'draw' | 'away'
+  selection: 'home' | 'draw' | 'away' | 'over' | 'under'
   odds: number
   stake: number
   status: 'pending' | 'won' | 'lost' | 'void'

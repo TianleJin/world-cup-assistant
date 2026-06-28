@@ -12,21 +12,20 @@ interface Props {
 
 export default function BetForm({ odds, balance, preselection }: Props) {
   const [state, action, pending] = useActionState(placeBetAction, null)
-  const [selection, setSelection] = useState<'home' | 'draw' | 'away' | ''>(
-    (preselection as 'home' | 'draw' | 'away') || ''
+  const [selection, setSelection] = useState<'home' | 'draw' | 'away' | 'over' | 'under' | ''>(
+    (preselection as 'home' | 'draw' | 'away' | 'over' | 'under') || ''
   )
   const [stake, setStake] = useState('')
 
   const matchDate = odds.commence_time.split('T')[0]
 
   const selectedOdds =
-    selection === 'home'
-      ? odds.home_odds
-      : selection === 'away'
-      ? odds.away_odds
-      : selection === 'draw'
-      ? odds.draw_odds
-      : null
+    selection === 'home' ? odds.home_odds
+    : selection === 'away' ? odds.away_odds
+    : selection === 'draw' ? odds.draw_odds
+    : selection === 'over' ? odds.over_odds
+    : selection === 'under' ? odds.under_odds
+    : null
 
   const potentialReturn =
     selectedOdds && stake ? (parseFloat(stake) * selectedOdds).toFixed(2) : null
@@ -36,13 +35,12 @@ export default function BetForm({ odds, balance, preselection }: Props) {
       : null
 
   const selectionLabel =
-    selection === 'home'
-      ? odds.home_team
-      : selection === 'away'
-      ? odds.away_team
-      : selection === 'draw'
-      ? 'Draw'
-      : ''
+    selection === 'home' ? odds.home_team
+    : selection === 'away' ? odds.away_team
+    : selection === 'draw' ? 'Draw'
+    : selection === 'over' ? 'Over 2.5 goals'
+    : selection === 'under' ? 'Under 2.5 goals'
+    : ''
 
   return (
     <form action={action} className="space-y-5">
@@ -55,9 +53,9 @@ export default function BetForm({ odds, balance, preselection }: Props) {
       <input type="hidden" name="selection" value={selection} />
       <input type="hidden" name="odds" value={selectedOdds?.toString() ?? ''} />
 
-      {/* Selection buttons */}
+      {/* Match winner buttons */}
       <div>
-        <p className="text-sm text-slate-400 mb-2">Pick a result</p>
+        <p className="text-sm text-slate-400 mb-2">Match winner</p>
         <div className="grid grid-cols-3 gap-2">
           {(
             [
@@ -83,6 +81,36 @@ export default function BetForm({ odds, balance, preselection }: Props) {
           ))}
         </div>
       </div>
+
+      {/* Over/under buttons */}
+      {(odds.over_odds || odds.under_odds) && (
+        <div>
+          <p className="text-sm text-slate-400 mb-2">Total goals</p>
+          <div className="grid grid-cols-2 gap-2">
+            {(
+              [
+                { key: 'over', label: 'Over 2.5', price: odds.over_odds },
+                { key: 'under', label: 'Under 2.5', price: odds.under_odds },
+              ] as const
+            ).map(({ key, label, price }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setSelection(key)}
+                disabled={!price}
+                className={`rounded-lg p-3 text-center border transition-colors ${
+                  selection === key
+                    ? 'bg-green-600 border-green-500 text-white'
+                    : 'bg-slate-700 border-slate-600 hover:bg-slate-600 text-slate-200'
+                } disabled:opacity-40 disabled:cursor-not-allowed`}
+              >
+                <div className="text-xs">{label}</div>
+                <div className="font-bold mt-0.5">{price?.toFixed(2) ?? '—'}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Stake */}
       <div>

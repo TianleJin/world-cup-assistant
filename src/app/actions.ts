@@ -32,7 +32,7 @@ export async function placeBetAction(
   const odds = parseFloat(oddsStr)
   const stake = parseFloat(stakeStr)
 
-  if (!selection || !['home', 'draw', 'away'].includes(selection)) {
+  if (!selection || !['home', 'draw', 'away', 'over', 'under'].includes(selection)) {
     return { error: 'Please select a result to bet on.' }
   }
   if (isNaN(stake) || stake < 1) {
