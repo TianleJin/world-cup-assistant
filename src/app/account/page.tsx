@@ -4,11 +4,17 @@ import Link from 'next/link'
 import { cancelBetAction } from '@/app/actions'
 import LocalTime from '@/components/local-time'
 import SettingsSection from '@/components/settings-section'
+import SuccessBanner from '@/components/success-banner'
 import type { Bet } from '@/types'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AccountPage() {
+interface Props {
+  searchParams: Promise<{ success?: string }>
+}
+
+export default async function AccountPage({ searchParams }: Props) {
+  const { success } = await searchParams
   const supabase = await createClient()
   const {
     data: { user },
@@ -44,6 +50,7 @@ export default async function AccountPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <h1 className="text-2xl font-bold">My Account</h1>
+      {success && <SuccessBanner type={success} />}
 
       {/* Balance & P&L summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

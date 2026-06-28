@@ -66,7 +66,7 @@ export async function placeBetAction(
 
   revalidatePath('/account')
   revalidatePath('/')
-  redirect('/account')
+  redirect(`/bet/${oddsMatchId}?success=bet_placed`)
 }
 
 export async function changePasswordAction(
@@ -126,6 +126,7 @@ export async function cancelBetAction(formData: FormData): Promise<void> {
   if (!user) redirect('/login')
 
   const betId = formData.get('bet_id') as string
+  const redirectTo = (formData.get('redirect_to') as string | null) ?? '/account'
 
   await supabase.rpc('cancel_bet', {
     p_bet_id: betId,
@@ -134,4 +135,5 @@ export async function cancelBetAction(formData: FormData): Promise<void> {
 
   revalidatePath('/account')
   revalidatePath('/')
+  redirect(`${redirectTo}?success=bet_cancelled`)
 }

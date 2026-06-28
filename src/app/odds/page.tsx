@@ -95,7 +95,6 @@ export default async function OddsPage() {
           const fixture = findFixture(o, matches)
           return (
             <OddsCard key={o.match_id} odds={o} fixture={fixture} user={user} />
-
           )
         })}
       </div>
