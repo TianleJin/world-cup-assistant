@@ -1,0 +1,14 @@
+name: Settle Bets
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # every 15 minutes
+
+jobs:
+  settle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call settle endpoint
+        run: |
+          curl -sf -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://world-cup-assistant-vert.vercel.app/api/settle
