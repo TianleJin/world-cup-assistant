@@ -49,11 +49,14 @@ export default async function Dashboard() {
   return (
     <div className="space-y-10">
       {/* Hero */}
-      <div className="text-center py-6">
-        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
-          FIFA World Cup 2026
+      <div className="text-center py-10">
+        <h1 className="text-3xl sm:text-5xl font-bold tracking-tight mb-3">
+          <span className="text-white">FIFA World Cup </span>
+          <span className="text-green-400">2026</span>
         </h1>
-        <p className="text-slate-400 text-sm">USA · Canada · Mexico</p>
+        <p className="text-amber-500/70 text-xs font-semibold tracking-[0.25em] uppercase">
+          USA · Canada · Mexico
+        </p>
       </div>
 
       {/* Portfolio widget — logged-in users only */}
@@ -123,7 +126,7 @@ export default async function Dashboard() {
           <Link
             key={href}
             href={href}
-            className="bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl p-4 text-center transition-colors"
+            className="bg-slate-800 hover:bg-white/[0.1] border border-slate-700 rounded-xl p-4 text-center transition-all hover:border-white/[0.15] hover:scale-[1.02]"
           >
             <div className="text-2xl mb-1">{icon}</div>
             <div className="text-sm font-medium text-slate-200">{label}</div>

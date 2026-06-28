@@ -38,7 +38,7 @@ export default function NavAuth({ user, balance }: { user: User | null; balance:
       {balance !== null && (
         <Link
           href="/account"
-          className="hidden sm:flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg px-3 py-1.5 transition-colors"
+          className="hidden sm:flex items-center gap-1.5 bg-white/[0.08] hover:bg-white/[0.13] border border-white/[0.12] rounded-lg px-3 py-1.5 transition-colors"
         >
           <span className="text-xs text-slate-400">Balance</span>
           <span className="text-sm font-bold text-green-400">
