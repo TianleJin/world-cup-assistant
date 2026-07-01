@@ -93,30 +93,31 @@ export default function MatchCard({ match, showBetLink, clips }: Props) {
         </div>
       )}
 
-      {/* Match highlight */}
-      {clips && clips.length > 0 && (
-        <div className="border-t border-slate-700 pt-2">
-          <a
-            href={clips[0].url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-red-400 transition-colors"
-          >
-            <span className="text-red-500 flex-shrink-0">▶</span>
-            <span>Match Highlights</span>
-          </a>
-        </div>
-      )}
+      {/* Match highlight + bet link — mt-auto pins these to the bottom */}
+      <div className="mt-auto flex flex-col gap-2">
+        {clips && clips.length > 0 && (
+          <div className="border-t border-slate-700 pt-2">
+            <a
+              href={clips[0].url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-red-400 transition-colors"
+            >
+              <span className="text-red-500 flex-shrink-0">▶</span>
+              <span>Match Highlights</span>
+            </a>
+          </div>
+        )}
 
-      {/* Bet link */}
-      {showBetLink && !isFinished && match.status !== 'POSTPONED' && match.status !== 'CANCELLED' && (
-        <Link
-          href={`/odds`}
-          className="mt-1 w-full text-center text-xs bg-green-700 hover:bg-green-600 text-white rounded-lg py-2 transition-colors"
-        >
-          View Odds & Bet
-        </Link>
-      )}
+        {showBetLink && !isFinished && match.status !== 'POSTPONED' && match.status !== 'CANCELLED' && (
+          <Link
+            href={`/odds`}
+            className="w-full text-center text-xs bg-green-700 hover:bg-green-600 text-white rounded-lg py-2 transition-colors"
+          >
+            View Odds & Bet
+          </Link>
+        )}
+      </div>
     </div>
   )
 }
