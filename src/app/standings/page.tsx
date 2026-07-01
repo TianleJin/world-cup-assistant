@@ -39,7 +39,7 @@ export default async function StandingsPage() {
 
   const bracketSection = knockoutMatches.length > 0 && (
     <section className="space-y-6">
-      <h2 className="text-xl font-bold">Knockout Stage</h2>
+      <h2 className="text-xl font-bold border-l-2 border-l-amber-500 pl-3">Knockout Stage</h2>
       {KNOCKOUT_STAGES.map(({ key, label }) => {
         const stage = knockoutMatches.filter(m => m.stage === key)
         if (stage.length === 0) return null
@@ -71,13 +71,13 @@ export default async function StandingsPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold">Standings</h1>
+      <h1 className="text-2xl font-bold">Bracket</h1>
 
       {knockoutUnderway ? (
         <>
           {bracketSection}
           <section>
-            <h2 className="text-xl font-bold mb-4">Group Stage</h2>
+            <h2 className="text-xl font-bold mb-4 border-l-2 border-l-amber-500 pl-3">Group Stage</h2>
             {groupSection}
           </section>
         </>
@@ -91,7 +91,7 @@ export default async function StandingsPage() {
       {/* Top scorers */}
       {scorers.length > 0 && (
         <section>
-          <h2 className="text-xl font-bold mb-4">Top Scorers</h2>
+          <h2 className="text-xl font-bold mb-4 border-l-2 border-l-amber-500 pl-3">Top Scorers</h2>
           <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
             <table className="w-full text-sm">
               <thead>
@@ -115,7 +115,7 @@ export default async function StandingsPage() {
                         <span className="text-slate-300">{s.team.shortName ?? s.team.name}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-right font-bold text-green-400">{s.goals}</td>
+                    <td className="px-4 py-3 text-right font-bold text-amber-400">{s.goals}</td>
                     <td className="px-4 py-3 text-right text-slate-400">{s.assists ?? 0}</td>
                   </tr>
                 ))}
@@ -220,7 +220,7 @@ function GroupTable({ standing }: { standing: Standing }) {
           {standing.table.map((row: StandingRow, idx: number) => (
             <tr
               key={row.team.id}
-              className={`border-b border-slate-700/40 ${idx < 2 ? 'bg-green-900/10' : ''}`}
+              className={`border-b border-slate-700/40 ${idx < 2 ? 'bg-amber-900/10' : ''}`}
             >
               <td className="px-4 py-2.5">
                 <div className="flex items-center gap-2">

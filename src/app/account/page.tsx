@@ -79,7 +79,7 @@ export default async function AccountPage({ searchParams }: Props) {
               <span className="ml-2 text-sm font-normal text-slate-400">({pending.length})</span>
             )}
           </h2>
-          <Link href="/odds" className="text-sm text-green-500 hover:text-green-400">
+          <Link href="/odds" className="text-sm text-amber-500 hover:text-amber-400">
             Place a bet →
           </Link>
         </div>
@@ -133,16 +133,22 @@ function StatCard({
   negative?: boolean
 }) {
   const valueClass = accent
-    ? 'text-green-400'
+    ? 'text-amber-400'
     : positive
     ? 'text-green-400'
     : negative
     ? 'text-red-400'
     : 'text-white'
 
+  const borderClass = positive
+    ? 'border-l-4 border-l-green-500'
+    : negative
+    ? 'border-l-4 border-l-red-500'
+    : ''
+
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-xl p-4">
-      <div className="text-xs text-slate-400 mb-1">{label}</div>
+    <div className={`bg-slate-800 border border-slate-700 rounded-xl p-4 ${borderClass}`}>
+      <div className="text-xs text-slate-300 mb-1">{label}</div>
       <div className={`text-lg font-bold ${valueClass}`}>{value}</div>
       {sub && <div className="text-xs text-slate-500 mt-0.5">{sub}</div>}
     </div>
@@ -171,8 +177,13 @@ function BetRow({ bet }: { bet: Bet }) {
       ? new Date(bet.commence_time) > now
       : bet.match_date >= now.toISOString().split('T')[0])
 
+  const rowBorderClass =
+    bet.status === 'won' ? 'border-l-2 border-l-green-500' :
+    bet.status === 'lost' ? 'border-l-2 border-l-red-500' :
+    'border-l-2 border-l-slate-600'
+
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
+    <div className={`bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap ${rowBorderClass}`}>
       <div className="min-w-0">
         <div className="text-sm font-medium text-white">
           {bet.home_team} vs {bet.away_team}

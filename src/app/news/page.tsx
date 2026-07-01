@@ -27,12 +27,14 @@ export default async function NewsPage() {
             className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden hover:border-slate-600 hover:bg-slate-750 transition-colors flex flex-col"
           >
             {a.urlToImage && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={a.urlToImage}
-                alt=""
-                className="w-full h-40 object-cover"
-              />
+              <div className="aspect-video overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={a.urlToImage}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
+              </div>
             )}
             <div className="p-4 flex flex-col flex-1 gap-2">
               <div className="flex items-center justify-between text-xs text-slate-400">

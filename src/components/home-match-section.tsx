@@ -67,8 +67,8 @@ export default function HomeMatchSection({ matches, highlights }: { matches: Mat
       {today.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">{"Today's Matches"}</h2>
-            <Link href="/schedule" className="text-sm text-green-500 hover:text-green-400">Full schedule →</Link>
+            <h2 className="text-lg font-semibold border-l-2 border-l-amber-500 pl-3">{"Today's Matches"}</h2>
+            <Link href="/schedule" className="text-sm text-amber-500 hover:text-amber-400">Full schedule →</Link>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {today.map(m => <MatchCard key={m.id} match={m} showBetLink clips={highlights?.[m.id]} />)}
@@ -79,8 +79,8 @@ export default function HomeMatchSection({ matches, highlights }: { matches: Mat
       {tomorrow.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">{"Tomorrow's Matches"}</h2>
-            <Link href="/schedule" className="text-sm text-green-500 hover:text-green-400">Full schedule →</Link>
+            <h2 className="text-lg font-semibold border-l-2 border-l-amber-500 pl-3">{"Tomorrow's Matches"}</h2>
+            <Link href="/schedule" className="text-sm text-amber-500 hover:text-amber-400">Full schedule →</Link>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {tomorrow.slice(0, 6).map(m => <MatchCard key={m.id} match={m} showBetLink clips={highlights?.[m.id]} />)}
@@ -91,8 +91,8 @@ export default function HomeMatchSection({ matches, highlights }: { matches: Mat
       {noUpcoming && recent.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Recent Results</h2>
-            <Link href="/results" className="text-sm text-green-500 hover:text-green-400">All results →</Link>
+            <h2 className="text-lg font-semibold border-l-2 border-l-amber-500 pl-3">Recent Results</h2>
+            <Link href="/results" className="text-sm text-amber-500 hover:text-amber-400">All results →</Link>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {recent.map(m => <MatchCard key={m.id} match={m} clips={highlights?.[m.id]} />)}

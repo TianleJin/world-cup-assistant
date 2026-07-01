@@ -25,7 +25,7 @@ export default function NavAuth({ user, balance }: { user: User | null; balance:
         </Link>
         <Link
           href="/register"
-          className="text-sm bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded-md transition-colors"
+          className="text-sm bg-amber-600 hover:bg-amber-500 text-white px-3 py-1.5 rounded-md transition-colors"
         >
           Register
         </Link>
@@ -41,7 +41,7 @@ export default function NavAuth({ user, balance }: { user: User | null; balance:
           className="hidden sm:flex items-center gap-1.5 bg-white/[0.08] hover:bg-white/[0.13] border border-white/[0.12] rounded-lg px-3 py-1.5 transition-colors"
         >
           <span className="text-xs text-slate-400">Balance</span>
-          <span className="text-sm font-bold text-green-400">
+          <span className="text-sm font-bold text-amber-400">
             ${balance.toLocaleString('en-AU', { minimumFractionDigits: 2 })}
           </span>
         </Link>

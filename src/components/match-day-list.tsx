@@ -38,9 +38,11 @@ export default function MatchDayList({ matches, showBetLink, highlights }: Props
       <div className="space-y-8">
         {[...byDate.entries()].map(([key, dayMatches]) => (
           <section key={key}>
-            <h2 className="text-sm font-medium text-slate-400 mb-3 uppercase tracking-wide">
-              {key}
-            </h2>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex-1 h-px bg-slate-700/70" />
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-[0.12em] shrink-0">{key}</span>
+              <div className="flex-1 h-px bg-slate-700/70" />
+            </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {dayMatches.map((m) => <MatchCard key={m.id} match={m} showBetLink={showBetLink} clips={highlights?.[m.id]} />)}
             </div>
@@ -54,9 +56,11 @@ export default function MatchDayList({ matches, showBetLink, highlights }: Props
     <div className="space-y-8">
       {groups.map(({ label, matches: dayMatches }) => (
         <section key={label}>
-          <h2 className="text-sm font-medium text-slate-400 mb-3 uppercase tracking-wide">
-            {label}
-          </h2>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1 h-px bg-slate-700/70" />
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-[0.12em] shrink-0">{label}</span>
+            <div className="flex-1 h-px bg-slate-700/70" />
+          </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {dayMatches.map((m) => <MatchCard key={m.id} match={m} showBetLink={showBetLink} clips={highlights?.[m.id]} />)}
           </div>

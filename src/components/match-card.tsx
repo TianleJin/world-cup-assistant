@@ -17,6 +17,16 @@ const STATUS_LABEL: Record<string, string> = {
   CANCELLED: 'Cancelled',
 }
 
+const STAGE_NICE_LABELS: Record<string, string> = {
+  GROUP_STAGE: 'Group Stage',
+  LAST_32: 'Round of 32',
+  LAST_16: 'Round of 16',
+  QUARTER_FINALS: 'Quarter-final',
+  SEMI_FINALS: 'Semi-final',
+  THIRD_PLACE: 'Third Place',
+  FINAL: 'Final',
+}
+
 export default function MatchCard({ match, showBetLink, clips }: Props) {
   const isLive = match.status === 'IN_PLAY' || match.status === 'PAUSED'
   const isFinished = match.status === 'FINISHED'
@@ -42,27 +52,36 @@ export default function MatchCard({ match, showBetLink, clips }: Props) {
 
   const stageLabel = match.group
     ? match.group.replace('GROUP_', 'Group ')
-    : match.stage.replace(/_/g, ' ')
+    : (STAGE_NICE_LABELS[match.stage] ?? match.stage.replace(/_/g, ' '))
 
-  const ftLabel =
-    duration === 'PENALTY_SHOOTOUT' ? 'PSO'
-    : duration === 'EXTRA_TIME' ? 'AET'
-    : 'FT'
+  const isPsoFinished = isFinished && hasPens
 
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 flex flex-col gap-3">
+    <div className={`bg-slate-800 rounded-xl p-4 flex flex-col gap-3 hover:shadow-lg hover:shadow-black/20 transition-all duration-150 ${
+      isPsoFinished
+        ? 'border border-slate-700 hover:border-slate-600 border-t-2 border-t-amber-500/60'
+        : 'border border-slate-700 hover:border-slate-600'
+    }`}>
       {/* Header */}
-      <div className="flex items-center justify-between text-xs">
-        <span className="text-slate-400">{stageLabel}</span>
+      <div className="flex items-center justify-between gap-2">
+        <span className="bg-amber-900/25 text-amber-400 border border-amber-800/40 px-2 py-0.5 rounded-full text-xs font-medium shrink-0">
+          {stageLabel}
+        </span>
         {isLive ? (
-          <span className="flex items-center gap-1 text-red-400 font-semibold">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+          <span className="flex items-center gap-1.5 bg-red-900/30 text-red-400 border border-red-800/40 px-2 py-0.5 rounded-full text-xs font-semibold shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse flex-shrink-0" />
             {STATUS_LABEL[match.status]}
           </span>
         ) : isFinished ? (
-          <span className="text-slate-500 font-medium">{ftLabel}</span>
+          hasPens ? (
+            <span className="bg-amber-900/30 text-amber-400 border border-amber-800/40 px-2 py-0.5 rounded-full text-xs font-semibold shrink-0">PSO</span>
+          ) : isAet ? (
+            <span className="bg-blue-900/30 text-blue-400 border border-blue-800/40 px-2 py-0.5 rounded-full text-xs font-semibold shrink-0">AET</span>
+          ) : (
+            <span className="bg-slate-700/60 text-slate-400 border border-slate-600/40 px-2 py-0.5 rounded-full text-xs font-semibold shrink-0">FT</span>
+          )
         ) : (
-          <span className="text-slate-400">
+          <span className="text-slate-400 text-xs shrink-0">
             <LocalTime iso={match.utcDate} options={{ month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }} />
           </span>
         )}
@@ -89,7 +108,7 @@ export default function MatchCard({ match, showBetLink, clips }: Props) {
       {/* Penalty shootout tally */}
       {isFinished && hasPens && penHome != null && penAway != null && (
         <div className="text-xs text-center -mt-1">
-          <span className="text-slate-300 font-semibold">Penalties: {penHome} – {penAway}</span>
+          <span className="text-amber-400 font-semibold">Penalties: {penHome} – {penAway}</span>
         </div>
       )}
 
@@ -112,7 +131,7 @@ export default function MatchCard({ match, showBetLink, clips }: Props) {
         {showBetLink && !isFinished && match.status !== 'POSTPONED' && match.status !== 'CANCELLED' && (
           <Link
             href={`/odds`}
-            className="w-full text-center text-xs bg-green-700 hover:bg-green-600 text-white rounded-lg py-2 transition-colors"
+            className="text-xs border border-amber-600 text-amber-400 hover:bg-amber-600 hover:text-white rounded-md px-3 py-1.5 transition-colors text-center"
           >
             View Odds & Bet
           </Link>

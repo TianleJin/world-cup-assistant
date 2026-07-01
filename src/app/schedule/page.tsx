@@ -1,5 +1,6 @@
 import { getMatches } from '@/lib/football-data'
 import MatchDayList from '@/components/match-day-list'
+import TimezoneLabel from '@/components/timezone-label'
 import type { Match } from '@/types'
 
 export const revalidate = 300
@@ -15,7 +16,7 @@ export default async function SchedulePage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold">Upcoming Schedule</h1>
+      <h1 className="text-2xl font-bold">Upcoming Schedule <TimezoneLabel /></h1>
       {sorted.length === 0 ? (
         <p className="text-slate-400">No upcoming matches scheduled.</p>
       ) : (

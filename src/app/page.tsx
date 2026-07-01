@@ -4,6 +4,7 @@ import { getFifaChannelVideos, findMatchClips } from '@/lib/youtube'
 import { createClient } from '@/lib/supabase/server'
 import HomeMatchSection from '@/components/home-match-section'
 import Link from 'next/link'
+import { Trophy, Calendar, Newspaper, TrendingUp } from 'lucide-react'
 import type { NewsArticle, Bet, Match } from '@/types'
 import type { YouTubeClip } from '@/lib/youtube'
 
@@ -49,10 +50,10 @@ export default async function Dashboard() {
   return (
     <div className="space-y-10">
       {/* Hero */}
-      <div className="text-center py-10">
-        <h1 className="text-3xl sm:text-5xl font-bold tracking-tight mb-3">
+      <div className="text-center py-6">
+        <h1 className="text-3xl sm:text-5xl font-bold tracking-tight mb-2">
           <span className="text-white">FIFA World Cup </span>
-          <span className="text-green-400">2026</span>
+          <span className="text-amber-400">2026</span>
         </h1>
         <p className="text-amber-500/70 text-xs font-semibold tracking-[0.25em] uppercase">
           USA · Canada · Mexico
@@ -66,7 +67,7 @@ export default async function Dashboard() {
             <div className="min-w-0 flex-1 flex flex-col sm:flex-row sm:items-center gap-4">
               <div className="flex-shrink-0">
                 <div className="text-xs text-slate-400 mb-0.5">Balance</div>
-                <div className="text-xl font-bold text-green-400">
+                <div className="text-xl font-bold text-amber-400">
                   ${balance.toLocaleString('en-AU', { minimumFractionDigits: 2 })}
                 </div>
                 {lockedAmount > 0 && (
@@ -101,10 +102,10 @@ export default async function Dashboard() {
                   {pendingCount} pending
                 </span>
               )}
-              <Link href="/account" className="text-sm text-green-500 hover:text-green-400">
+              <Link href="/account" className="text-sm text-amber-500 hover:text-amber-400">
                 Full account →
               </Link>
-              <Link href="/odds" className="text-sm bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded-lg transition-colors">
+              <Link href="/odds" className="text-sm bg-amber-600 hover:bg-amber-500 text-white px-3 py-1.5 rounded-lg transition-colors">
                 Place bet
               </Link>
             </div>
@@ -118,17 +119,21 @@ export default async function Dashboard() {
       {/* Quick links */}
       <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { href: '/standings', label: 'Standings', icon: '🏆' },
-          { href: '/schedule', label: 'Schedule', icon: '📅' },
-          { href: '/news', label: 'News', icon: '📰' },
-          { href: '/odds', label: 'Bet Now', icon: '💰' },
-        ].map(({ href, label, icon }) => (
+          { href: '/standings', label: 'Bracket', Icon: Trophy },
+          { href: '/schedule', label: 'Schedule', Icon: Calendar },
+          { href: '/news', label: 'News', Icon: Newspaper },
+          { href: '/odds', label: 'Bet Now', Icon: TrendingUp },
+        ].map(({ href, label, Icon }) => (
           <Link
             key={href}
             href={href}
-            className="bg-slate-800 hover:bg-white/[0.1] border border-slate-700 rounded-xl p-4 text-center transition-all hover:border-white/[0.15] hover:scale-[1.02]"
+            className="bg-slate-800 hover:bg-white/[0.1] border border-slate-700 rounded-xl p-4 text-center transition-all hover:border-amber-800/60 hover:scale-[1.02]"
           >
-            <div className="text-2xl mb-1">{icon}</div>
+            <div className="flex justify-center mb-2">
+              <div className="w-10 h-10 rounded-full bg-amber-900/25 flex items-center justify-center">
+                <Icon className="w-5 h-5 text-amber-400" />
+              </div>
+            </div>
             <div className="text-sm font-medium text-slate-200">{label}</div>
           </Link>
         ))}
@@ -138,8 +143,8 @@ export default async function Dashboard() {
       {news.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Latest News</h2>
-            <Link href="/news" className="text-sm text-green-500 hover:text-green-400">
+            <h2 className="text-lg font-semibold border-l-2 border-l-amber-500 pl-3">Latest News</h2>
+            <Link href="/news" className="text-sm text-amber-500 hover:text-amber-400">
               All news →
             </Link>
           </div>
@@ -153,12 +158,10 @@ export default async function Dashboard() {
                 className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden hover:border-slate-600 transition-colors"
               >
                 {a.urlToImage && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={a.urlToImage}
-                    alt=""
-                    className="w-full h-36 object-cover"
-                  />
+                  <div className="aspect-video overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={a.urlToImage} alt="" className="w-full h-full object-cover" />
+                  </div>
                 )}
                 <div className="p-3">
                   <p className="text-xs text-slate-400 mb-1">{a.source.name}</p>

@@ -69,7 +69,7 @@ export default async function OddsPage() {
         {!user && (
           <Link
             href="/register"
-            className="text-sm bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg text-white transition-colors"
+            className="text-sm bg-amber-600 hover:bg-amber-500 px-4 py-2 rounded-lg text-white transition-colors"
           >
             Register to bet
           </Link>
@@ -117,7 +117,7 @@ function OddsCard({
     <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 space-y-4">
       {/* Stage + kickoff */}
       <div className="flex items-center justify-between text-xs">
-        {stageLabel && <span className="text-green-500 font-medium">{stageLabel}</span>}
+        {stageLabel && <span className="text-amber-500 font-medium">{stageLabel}</span>}
         <span className="text-slate-400">
           <LocalTime iso={odds.commence_time} options={{ month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }} />
         </span>
@@ -238,10 +238,10 @@ function OddsButton({
   return (
     <Link
       href={href}
-      className="bg-slate-700 hover:bg-green-700 border border-slate-600 hover:border-green-500 rounded-lg px-2 py-3 text-center transition-colors group"
+      className="bg-slate-700 hover:bg-slate-600 border border-slate-500 hover:border-amber-500 rounded-lg px-2 py-3 text-center transition-colors group"
     >
       <div className="text-xs text-slate-400 group-hover:text-green-200 truncate">{label}</div>
-      <div className="text-white font-bold text-sm mt-0.5">{price.toFixed(2)}</div>
+      <div className="text-white font-bold text-lg mt-0.5">{price.toFixed(2)}</div>
     </Link>
   )
 }
