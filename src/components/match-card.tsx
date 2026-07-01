@@ -25,9 +25,29 @@ export default function MatchCard({ match, showBetLink, clips }: Props) {
   const homeWon = match.score.winner === 'HOME_TEAM'
   const awayWon = match.score.winner === 'AWAY_TEAM'
 
+  const duration = match.score.duration
+  const isAet = duration === 'EXTRA_TIME' || duration === 'PENALTY_SHOOTOUT'
+  const hasPens = duration === 'PENALTY_SHOOTOUT'
+  const penHome = match.score.penalties?.home
+  const penAway = match.score.penalties?.away
+
+  // fullTime from football-data.org includes penalty goals for PSO matches,
+  // so subtract them to get the pre-penalty (aet) score for display.
+  const displayHome = hasPens && penHome != null
+    ? (match.score.fullTime.home ?? 0) - penHome
+    : match.score.fullTime.home
+  const displayAway = hasPens && penAway != null
+    ? (match.score.fullTime.away ?? 0) - penAway
+    : match.score.fullTime.away
+
   const stageLabel = match.group
     ? match.group.replace('GROUP_', 'Group ')
     : match.stage.replace(/_/g, ' ')
+
+  const ftLabel =
+    duration === 'PENALTY_SHOOTOUT' ? 'PSO'
+    : duration === 'EXTRA_TIME' ? 'AET'
+    : 'FT'
 
   return (
     <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 flex flex-col gap-3">
@@ -40,7 +60,7 @@ export default function MatchCard({ match, showBetLink, clips }: Props) {
             {STATUS_LABEL[match.status]}
           </span>
         ) : isFinished ? (
-          <span className="text-slate-500 font-medium">FT</span>
+          <span className="text-slate-500 font-medium">{ftLabel}</span>
         ) : (
           <span className="text-slate-400">
             <LocalTime iso={match.utcDate} options={{ month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }} />
@@ -53,18 +73,25 @@ export default function MatchCard({ match, showBetLink, clips }: Props) {
         <TeamRow
           name={match.homeTeam.name}
           crest={match.homeTeam.crest}
-          score={match.score.fullTime.home}
+          score={displayHome}
           showScore={hasScore}
           bold={homeWon}
         />
         <TeamRow
           name={match.awayTeam.name}
           crest={match.awayTeam.crest}
-          score={match.score.fullTime.away}
+          score={displayAway}
           showScore={hasScore}
           bold={awayWon}
         />
       </div>
+
+      {/* Penalty shootout tally */}
+      {isFinished && hasPens && penHome != null && penAway != null && (
+        <div className="text-xs text-center -mt-1">
+          <span className="text-slate-300 font-semibold">Penalties: {penHome} – {penAway}</span>
+        </div>
+      )}
 
       {/* Match highlight */}
       {clips && clips.length > 0 && (

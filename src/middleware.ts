@@ -25,7 +25,17 @@ export async function middleware(request: NextRequest) {
 
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser()
+
+  // Stale session — clear the invalid cookie so the error doesn't repeat on every request
+  if (error?.code === 'refresh_token_not_found') {
+    const response = NextResponse.redirect(request.nextUrl.clone())
+    request.cookies.getAll().forEach(({ name }) => {
+      if (name.startsWith('sb-')) response.cookies.delete(name)
+    })
+    return response
+  }
 
   // Protect pages that require login
   const pathname = request.nextUrl.pathname

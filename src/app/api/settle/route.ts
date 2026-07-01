@@ -47,8 +47,12 @@ export async function GET(request: NextRequest) {
     if (!match) continue // Result not in yet
 
     const winner = match.score.winner
-    const homeGoals = match.score.fullTime.home
-    const awayGoals = match.score.fullTime.away
+    // For PSO matches fullTime includes penalty goals; subtract them to get real goals
+    const isPso = match.score.duration === 'PENALTY_SHOOTOUT'
+    const penHome = isPso ? (match.score.penalties?.home ?? 0) : 0
+    const penAway = isPso ? (match.score.penalties?.away ?? 0) : 0
+    const homeGoals = match.score.fullTime.home != null ? match.score.fullTime.home - penHome : null
+    const awayGoals = match.score.fullTime.away != null ? match.score.fullTime.away - penAway : null
     let status: 'won' | 'lost' | 'void'
 
     if (bet.selection === 'over' || bet.selection === 'under') {
