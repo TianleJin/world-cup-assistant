@@ -44,7 +44,7 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
-              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-green-500"
+              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
               placeholder="you@example.com"
             />
           </div>
@@ -56,7 +56,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="current-password"
-              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-green-500"
+              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
               placeholder="••••••••"
             />
           </div>
@@ -70,7 +70,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition-colors"
+            className="w-full bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition-colors"
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
@@ -78,7 +78,7 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-slate-400">
           No account?{' '}
-          <Link href="/register" className="text-green-500 hover:text-green-400">
+          <Link href="/register" className="text-amber-500 hover:text-amber-400">
             Register for $10,000 free credit
           </Link>
         </p>

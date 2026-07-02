@@ -58,11 +58,7 @@ export default function RegisterPage() {
             We sent a confirmation link to <span className="text-white">{email}</span>.
             Click the link to activate your account and claim your $10,000 starting credit.
           </p>
-          <p className="text-xs text-slate-500">
-            Tip: You can also disable email confirmation in your Supabase project under{' '}
-            <strong>Authentication → Email</strong> for easier local testing.
-          </p>
-          <Link href="/login" className="text-green-500 hover:text-green-400 text-sm block">
+          <Link href="/login" className="text-amber-500 hover:text-amber-400 text-sm block">
             Back to sign in
           </Link>
         </div>
@@ -77,7 +73,7 @@ export default function RegisterPage() {
           <div className="text-4xl mb-3">🏆</div>
           <h1 className="text-2xl font-bold">Create account</h1>
           <p className="text-slate-400 text-sm mt-1">
-            Get <span className="text-green-400 font-semibold">$10,000</span> in virtual credit to start betting
+            Get <span className="text-amber-400 font-semibold">$10,000</span> in virtual credit to start betting
           </p>
         </div>
 
@@ -90,7 +86,7 @@ export default function RegisterPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
-              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-green-500"
+              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
               placeholder="you@example.com"
             />
           </div>
@@ -103,7 +99,7 @@ export default function RegisterPage() {
               required
               minLength={6}
               autoComplete="new-password"
-              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-green-500"
+              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
               placeholder="At least 6 characters"
             />
           </div>
@@ -124,7 +120,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition-colors"
+            className="w-full bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition-colors"
           >
             {loading ? 'Creating account...' : 'Create account'}
           </button>
@@ -132,7 +128,7 @@ export default function RegisterPage() {
 
         <p className="text-center text-sm text-slate-400">
           Already have an account?{' '}
-          <Link href="/login" className="text-green-500 hover:text-green-400">
+          <Link href="/login" className="text-amber-500 hover:text-amber-400">
             Sign in
           </Link>
         </p>
