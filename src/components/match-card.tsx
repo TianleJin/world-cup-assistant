@@ -169,7 +169,7 @@ function TeamRow({
         </span>
       </div>
       {showScore && (
-        <span className={`text-lg font-bold ml-3 ${bold ? 'text-green-400' : 'text-slate-300'}`}>
+        <span className={`text-lg font-bold ml-3 ${bold ? 'text-amber-400' : 'text-slate-300'}`}>
           {score ?? 0}
         </span>
       )}

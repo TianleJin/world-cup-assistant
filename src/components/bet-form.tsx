@@ -71,7 +71,7 @@ export default function BetForm({ odds, balance, preselection }: Props) {
               disabled={!price}
               className={`rounded-lg p-3 text-center border transition-colors ${
                 selection === key
-                  ? 'bg-green-600 border-green-500 text-white'
+                  ? 'bg-amber-600 border-amber-500 text-white'
                   : 'bg-slate-700 border-slate-600 hover:bg-slate-600 text-slate-200'
               } disabled:opacity-40 disabled:cursor-not-allowed`}
             >
@@ -100,7 +100,7 @@ export default function BetForm({ odds, balance, preselection }: Props) {
                 disabled={!price}
                 className={`rounded-lg p-3 text-center border transition-colors ${
                   selection === key
-                    ? 'bg-green-600 border-green-500 text-white'
+                    ? 'bg-amber-600 border-amber-500 text-white'
                     : 'bg-slate-700 border-slate-600 hover:bg-slate-600 text-slate-200'
                 } disabled:opacity-40 disabled:cursor-not-allowed`}
               >
@@ -126,7 +126,7 @@ export default function BetForm({ odds, balance, preselection }: Props) {
             value={stake}
             onChange={(e) => setStake(e.target.value.replace(/[^0-9.]/g, ''))}
             placeholder="0.00"
-            className="w-full bg-slate-700 border border-slate-600 rounded-lg pl-7 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-green-500"
+            className="w-full bg-slate-700 border border-slate-600 rounded-lg pl-7 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
           />
         </div>
         {/* Quick stake buttons */}
@@ -157,11 +157,11 @@ export default function BetForm({ odds, balance, preselection }: Props) {
           </div>
           <div className="flex justify-between font-semibold text-white border-t border-slate-600 pt-1 mt-1">
             <span>Potential return</span>
-            <span className="text-green-400">${potentialReturn}</span>
+            <span className="text-amber-400">${potentialReturn}</span>
           </div>
           <div className="flex justify-between text-xs text-slate-400">
             <span>Potential profit</span>
-            <span className="text-green-500">+${potentialProfit}</span>
+            <span className="text-amber-500">+${potentialProfit}</span>
           </div>
         </div>
       )}
@@ -177,7 +177,7 @@ export default function BetForm({ odds, balance, preselection }: Props) {
       <button
         type="submit"
         disabled={pending || !selection || !stake || parseFloat(stake) < 1}
-        className="w-full bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-colors"
+        className="w-full bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-colors"
       >
         {pending ? 'Placing bet...' : 'Place Bet'}
       </button>

@@ -42,7 +42,7 @@ export default async function BetPage({ params, searchParams }: Props) {
         <p className="text-sm text-slate-500">
           The odds may have expired or the match is no longer available.
         </p>
-        <Link href="/odds" className="text-green-500 hover:text-green-400 text-sm">
+        <Link href="/odds" className="text-amber-500 hover:text-amber-400 text-sm">
           ← Back to odds
         </Link>
       </div>

@@ -186,7 +186,7 @@ function BracketTeamRow({ name, crest, score, showScore, bold }: {
         </span>
       </div>
       {showScore && (
-        <span className={`text-sm font-bold ml-1 flex-shrink-0 ${bold ? 'text-green-400' : 'text-slate-300'}`}>
+        <span className={`text-sm font-bold ml-1 flex-shrink-0 ${bold ? 'text-amber-400' : 'text-slate-300'}`}>
           {score ?? 0}
         </span>
       )}

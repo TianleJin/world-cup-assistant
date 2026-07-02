@@ -66,7 +66,7 @@ export async function placeBetAction(
 
   revalidatePath('/account')
   revalidatePath('/')
-  redirect(`/bet/${oddsMatchId}?success=bet_placed`)
+  redirect(`/odds?success=bet_placed`)
 }
 
 export async function changePasswordAction(
