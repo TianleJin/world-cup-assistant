@@ -29,11 +29,12 @@ export default function NavTournamentSwitcher() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 text-sm text-slate-300 hover:text-white bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] rounded-md px-2.5 py-1.5 transition-colors"
+        aria-label="Switch tournament"
+        className="flex items-center gap-1.5 text-sm text-slate-300 hover:text-white bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] rounded-md p-2 sm:px-2.5 sm:py-1.5 transition-colors"
       >
         <Trophy className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-        <span className="max-w-[6.5rem] sm:max-w-[10rem] truncate">{active ? active.shortName : 'Tournaments'}</span>
-        <ChevronDown className={`w-3.5 h-3.5 transition-transform flex-shrink-0 ${open ? 'rotate-180' : ''}`} />
+        <span className="hidden sm:inline-block sm:max-w-[10rem] truncate">{active ? active.shortName : 'Tournaments'}</span>
+        <ChevronDown className={`hidden sm:block w-3.5 h-3.5 transition-transform flex-shrink-0 ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
