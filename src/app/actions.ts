@@ -33,7 +33,11 @@ export async function placeBetAction(
   const odds = parseFloat(oddsStr)
   const stake = parseFloat(stakeStr)
 
-  if (!selection || !['home', 'draw', 'away', 'over', 'under'].includes(selection)) {
+  // Totals (over/under) betting was retired when we stopped fetching that market
+  // from The Odds API (quota reasons) — the odds/bet-form UI no longer offers it,
+  // reject it here too in case of a hand-crafted request. Historical over/under
+  // bets already in the database are unaffected and still settle correctly.
+  if (!selection || !['home', 'draw', 'away'].includes(selection)) {
     return { error: 'Please select a result to bet on.' }
   }
   if (isNaN(stake) || stake < 1) {
