@@ -16,9 +16,9 @@ export default async function Nav() {
 
   return (
     <nav className="bg-slate-950/80 backdrop-blur-md border-b border-white/[0.08] sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="font-bold text-lg tracking-tight flex items-center gap-1.5" style={{ fontFamily: 'var(--font-russo), sans-serif' }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-2 h-14">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+          <Link href="/" className="font-bold text-lg tracking-tight flex items-center gap-1.5 flex-shrink-0" style={{ fontFamily: 'var(--font-russo), sans-serif' }}>
             <span className="text-white">FOOTY</span><span className="text-amber-400">HQ</span>
           </Link>
           <NavTournamentSwitcher />

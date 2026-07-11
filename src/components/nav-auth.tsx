@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { UserRound, LogOut } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 
 export default function NavAuth({ user, balance }: { user: User | null; balance: number | null }) {
@@ -34,7 +35,7 @@ export default function NavAuth({ user, balance }: { user: User | null; balance:
   }
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2 sm:gap-3">
       {balance !== null && (
         <Link
           href="/account"
@@ -48,15 +49,19 @@ export default function NavAuth({ user, balance }: { user: User | null; balance:
       )}
       <Link
         href="/account"
-        className="text-sm text-slate-300 hover:text-white transition-colors"
+        aria-label="My Account"
+        className="flex items-center gap-1.5 text-slate-300 hover:text-white transition-colors"
       >
-        My Account
+        <UserRound className="w-5 h-5 sm:hidden" />
+        <span className="hidden sm:inline text-sm">My Account</span>
       </Link>
       <button
         onClick={signOut}
-        className="text-sm text-slate-500 hover:text-slate-300 transition-colors"
+        aria-label="Sign out"
+        className="flex items-center text-slate-500 hover:text-slate-300 transition-colors"
       >
-        Sign out
+        <LogOut className="w-5 h-5 sm:hidden" />
+        <span className="hidden sm:inline text-sm">Sign out</span>
       </button>
     </div>
   )
