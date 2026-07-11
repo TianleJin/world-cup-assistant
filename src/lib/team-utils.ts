@@ -13,7 +13,8 @@ export function normalizeTeamName(name: string | null | undefined): string {
   const lower = name.toLowerCase().trim()
   if (ALIASES[lower]) return ALIASES[lower]
   return lower
-    .replace(/\b(fc|cf|sc|ac|afc|bvb)\b/g, '')
+    .replace(/[-&']/g, ' ')
+    .replace(/\b(fc|cf|sc|ac|afc|bvb|and)\b/g, '')
     .replace(/[^a-z\s]/g, '')
     .replace(/\s+/g, ' ')
     .trim()

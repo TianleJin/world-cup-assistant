@@ -44,7 +44,18 @@ export async function GET(request: NextRequest) {
       )
     })
 
-    if (!match) continue // Result not in yet
+    if (!match) {
+      // Distinguish "result not in yet" from "should have matched but didn't" —
+      // the latter usually means a team-name mismatch between data sources (see team-utils.ts)
+      const staleDays = (Date.now() - new Date(bet.match_date).getTime()) / (1000 * 60 * 60 * 24)
+      if (staleDays > 2) {
+        console.warn(
+          `[settle] Bet ${bet.id} (${bet.home_team} vs ${bet.away_team} on ${bet.match_date}) ` +
+          `is ${staleDays.toFixed(1)} days old with no matching finished match — possible team-name mismatch.`
+        )
+      }
+      continue
+    }
 
     const winner = match.score.winner
     // For PSO matches fullTime includes penalty goals; subtract them to get real goals
