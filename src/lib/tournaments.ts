@@ -96,7 +96,8 @@ const premierLeague: Tournament = {
       'rugby', 'nrl', 'basketball', 'nba', 'baseball', 'mlb',
     ],
   },
-  betting: false,
+  betting: true,
+  oddsSportKey: 'soccer_epl',
 }
 
 export const TOURNAMENTS: Tournament[] = [worldCup, premierLeague]

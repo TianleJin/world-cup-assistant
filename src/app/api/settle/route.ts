@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getMatches } from '@/lib/football-data'
-import { getTournament } from '@/lib/tournaments'
+import { TOURNAMENTS } from '@/lib/tournaments'
 import { teamsMatch } from '@/lib/team-utils'
 import type { Match, Bet } from '@/types'
 
@@ -30,73 +30,80 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ settled: 0, message: 'No pending bets to settle' })
   }
 
-  // Fetch recently finished matches. Only the World Cup has betting enabled today,
-  // so all bets settle against WC results. When a second tournament gets betting,
-  // tag bets with their competition and settle per-competition (see plan "Deferred").
-  const worldCup = getTournament('world-cup')!
-  const finishedMatches = await getMatches(worldCup, 'FINISHED')
+  // Settle each betting tournament against its own finished matches. Bets are
+  // tagged with the competition they were placed under (see migration
+  // 003_bet_competition.sql), so this avoids matching a bet to the wrong
+  // tournament's results when two competitions have overlapping dates/teams.
+  const bettingTournaments = TOURNAMENTS.filter((t) => t.betting)
   let settled = 0
   const errors: string[] = []
 
-  for (const bet of pendingBets as Bet[]) {
-    const match = finishedMatches.find((m: Match) => {
-      const mDate = m.utcDate.split('T')[0]
-      return (
-        mDate === bet.match_date &&
-        teamsMatch(m.homeTeam.name, bet.home_team) &&
-        teamsMatch(m.awayTeam.name, bet.away_team)
-      )
-    })
+  for (const t of bettingTournaments) {
+    const betsForTournament = (pendingBets as Bet[]).filter((b) => b.competition === t.slug)
+    if (betsForTournament.length === 0) continue
 
-    if (!match) {
-      // Distinguish "result not in yet" from "should have matched but didn't" —
-      // the latter usually means a team-name mismatch between data sources (see team-utils.ts)
-      const staleDays = (Date.now() - new Date(bet.match_date).getTime()) / (1000 * 60 * 60 * 24)
-      if (staleDays > 2) {
-        console.warn(
-          `[settle] Bet ${bet.id} (${bet.home_team} vs ${bet.away_team} on ${bet.match_date}) ` +
-          `is ${staleDays.toFixed(1)} days old with no matching finished match — possible team-name mismatch.`
+    const finishedMatches = await getMatches(t, 'FINISHED')
+
+    for (const bet of betsForTournament) {
+      const match = finishedMatches.find((m: Match) => {
+        const mDate = m.utcDate.split('T')[0]
+        return (
+          mDate === bet.match_date &&
+          teamsMatch(m.homeTeam.name, bet.home_team) &&
+          teamsMatch(m.awayTeam.name, bet.away_team)
         )
+      })
+
+      if (!match) {
+        // Distinguish "result not in yet" from "should have matched but didn't" —
+        // the latter usually means a team-name mismatch between data sources (see team-utils.ts)
+        const staleDays = (Date.now() - new Date(bet.match_date).getTime()) / (1000 * 60 * 60 * 24)
+        if (staleDays > 2) {
+          console.warn(
+            `[settle] Bet ${bet.id} (${t.slug}: ${bet.home_team} vs ${bet.away_team} on ${bet.match_date}) ` +
+            `is ${staleDays.toFixed(1)} days old with no matching finished match — possible team-name mismatch.`
+          )
+        }
+        continue
       }
-      continue
-    }
 
-    const winner = match.score.winner
-    // For PSO matches fullTime includes penalty goals; subtract them to get real goals
-    const isPso = match.score.duration === 'PENALTY_SHOOTOUT'
-    const penHome = isPso ? (match.score.penalties?.home ?? 0) : 0
-    const penAway = isPso ? (match.score.penalties?.away ?? 0) : 0
-    const homeGoals = match.score.fullTime.home != null ? match.score.fullTime.home - penHome : null
-    const awayGoals = match.score.fullTime.away != null ? match.score.fullTime.away - penAway : null
-    let status: 'won' | 'lost' | 'void'
+      const winner = match.score.winner
+      // For PSO matches fullTime includes penalty goals; subtract them to get real goals
+      const isPso = match.score.duration === 'PENALTY_SHOOTOUT'
+      const penHome = isPso ? (match.score.penalties?.home ?? 0) : 0
+      const penAway = isPso ? (match.score.penalties?.away ?? 0) : 0
+      const homeGoals = match.score.fullTime.home != null ? match.score.fullTime.home - penHome : null
+      const awayGoals = match.score.fullTime.away != null ? match.score.fullTime.away - penAway : null
+      let status: 'won' | 'lost' | 'void'
 
-    if (bet.selection === 'over' || bet.selection === 'under') {
-      if (homeGoals === null || awayGoals === null) continue
-      const totalGoals = homeGoals + awayGoals
-      status = (bet.selection === 'over' && totalGoals > 2.5) ||
-               (bet.selection === 'under' && totalGoals < 2.5) ? 'won' : 'lost'
-    } else {
-      if (winner === null) continue
-      status =
-        (bet.selection === 'home' && winner === 'HOME_TEAM') ||
-        (bet.selection === 'away' && winner === 'AWAY_TEAM') ||
-        (bet.selection === 'draw' && winner === 'DRAW')
-          ? 'won'
-          : 'lost'
-    }
+      if (bet.selection === 'over' || bet.selection === 'under') {
+        if (homeGoals === null || awayGoals === null) continue
+        const totalGoals = homeGoals + awayGoals
+        status = (bet.selection === 'over' && totalGoals > 2.5) ||
+                 (bet.selection === 'under' && totalGoals < 2.5) ? 'won' : 'lost'
+      } else {
+        if (winner === null) continue
+        status =
+          (bet.selection === 'home' && winner === 'HOME_TEAM') ||
+          (bet.selection === 'away' && winner === 'AWAY_TEAM') ||
+          (bet.selection === 'draw' && winner === 'DRAW')
+            ? 'won'
+            : 'lost'
+      }
 
-    const payout = status === 'won' ? bet.stake * bet.odds : 0
+      const payout = status === 'won' ? bet.stake * bet.odds : 0
 
-    const { error: settleError } = await supabase.rpc('settle_bet', {
-      p_bet_id: bet.id,
-      p_status: status,
-      p_payout: payout,
-    })
+      const { error: settleError } = await supabase.rpc('settle_bet', {
+        p_bet_id: bet.id,
+        p_status: status,
+        p_payout: payout,
+      })
 
-    if (settleError) {
-      errors.push(`Bet ${bet.id}: ${settleError.message}`)
-    } else {
-      settled++
+      if (settleError) {
+        errors.push(`Bet ${bet.id}: ${settleError.message}`)
+      } else {
+        settled++
+      }
     }
   }
 

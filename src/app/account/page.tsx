@@ -5,6 +5,7 @@ import { cancelBetAction } from '@/app/actions'
 import LocalTime from '@/components/local-time'
 import SettingsSection from '@/components/settings-section'
 import SuccessBanner from '@/components/success-banner'
+import { getTournament } from '@/lib/tournaments'
 import type { Bet } from '@/types'
 
 export const dynamic = 'force-dynamic'
@@ -79,7 +80,7 @@ export default async function AccountPage({ searchParams }: Props) {
               <span className="ml-2 text-sm font-normal text-slate-400">({pending.length})</span>
             )}
           </h2>
-          <Link href="/world-cup/odds" className="text-sm text-amber-500 hover:text-amber-400">
+          <Link href="/" className="text-sm text-amber-500 hover:text-amber-400">
             Place a bet →
           </Link>
         </div>
@@ -182,11 +183,18 @@ function BetRow({ bet }: { bet: Bet }) {
     bet.status === 'lost' ? 'border-l-2 border-l-red-500' :
     'border-l-2 border-l-slate-600'
 
+  const tournamentLabel = getTournament(bet.competition)?.shortName ?? bet.competition
+
   return (
     <div className={`bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap ${rowBorderClass}`}>
       <div className="min-w-0">
-        <div className="text-sm font-medium text-white">
-          {bet.home_team} vs {bet.away_team}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-sm font-medium text-white">
+            {bet.home_team} vs {bet.away_team}
+          </span>
+          <span className="text-[10px] uppercase tracking-wide text-amber-500/80 bg-amber-900/20 border border-amber-800/40 rounded px-1.5 py-0.5">
+            {tournamentLabel}
+          </span>
         </div>
         <div className="text-xs text-slate-400 mt-0.5">
           {selectionLabel} @ {bet.odds.toFixed(2)} · ${bet.stake.toFixed(2)} stake ·{' '}

@@ -32,9 +32,9 @@ export default async function BetPage({ params, searchParams }: Props) {
   if (!user) redirect('/login?redirected=1')
 
   const [odds, profileResult, betsResult] = await Promise.all([
-    getOddsByMatchId(matchId),
+    getOddsByMatchId(t, matchId),
     supabase.from('user_profiles').select('wallet_balance').eq('id', user.id).single(),
-    supabase.from('bets').select('*').eq('user_id', user.id).eq('odds_match_id', matchId).neq('status', 'void').order('placed_at', { ascending: false }),
+    supabase.from('bets').select('*').eq('user_id', user.id).eq('competition', t.slug).eq('odds_match_id', matchId).neq('status', 'void').order('placed_at', { ascending: false }),
   ])
 
   const balance = (profileResult.data?.wallet_balance as number) ?? 0

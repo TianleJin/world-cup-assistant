@@ -56,6 +56,7 @@ export async function placeBetAction(
     p_selection: selection,
     p_odds: odds,
     p_stake: stake,
+    p_competition: tournamentSlug,
   })
 
   if (error) {

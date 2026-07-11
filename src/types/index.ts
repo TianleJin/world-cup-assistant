@@ -56,6 +56,7 @@ export interface NewsArticle {
 
 export interface OddsRow {
   id?: string
+  competition: string
   match_id: string
   home_team: string
   away_team: string
@@ -72,6 +73,7 @@ export interface OddsRow {
 export interface Bet {
   id: string
   user_id: string
+  competition: string
   odds_match_id: string
   home_team: string
   away_team: string

@@ -3,12 +3,13 @@ import type { Tournament } from '@/lib/tournaments'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 const BASE = 'https://api.the-odds-api.com/v4'
-const CACHE_TTL_MS = 6 * 60 * 60 * 1000 // 6 hours
+const CACHE_TTL_MS = 12 * 60 * 60 * 1000 // 12 hours — see quota note below
 
-// NOTE: odds_cache has no competition column, so this cache is global. That is
-// only safe while a single tournament (the World Cup) has betting enabled. Before
-// enabling betting on a second tournament, add a competition column to odds_cache
-// (and its conflict key) and filter by it here. See the plan's "Deferred" section.
+// The Odds API bills per (market × region) on every cache-miss refresh. With two
+// betting tournaments sharing one free-tier key (500 req/month), h2h+totals at a
+// 6h TTL would cost ~480/month — almost no headroom. Requesting h2h only (no
+// totals/over-under market) at a 12h TTL keeps both tournaments comfortably under
+// quota. over_odds/under_odds stay in the schema/types but are always null now.
 export async function getOdds(t: Tournament): Promise<OddsRow[]> {
   const supabase = createAdminClient()
   const since = new Date(Date.now() - CACHE_TTL_MS).toISOString()
@@ -17,6 +18,7 @@ export async function getOdds(t: Tournament): Promise<OddsRow[]> {
   const { data: cached } = await supabase
     .from('odds_cache')
     .select('*')
+    .eq('competition', t.slug)
     .gte('fetched_at', since)
     .order('commence_time', { ascending: true })
 
@@ -27,7 +29,7 @@ export async function getOdds(t: Tournament): Promise<OddsRow[]> {
   const params = new URLSearchParams({
     apiKey: process.env.ODDS_API_KEY!,
     regions: 'au',
-    markets: 'h2h,totals',
+    markets: 'h2h',
     dateFormat: 'iso',
   })
 
@@ -46,12 +48,9 @@ export async function getOdds(t: Tournament): Promise<OddsRow[]> {
     const h2hBookmaker = bookmakers.find((b) => b.key === 'sportsbet') ?? bookmakers[0]
     const h2h = h2hBookmaker?.markets?.find((m) => m.key === 'h2h')
     const h2hOutcomes = h2h?.outcomes ?? []
-    // Use any bookmaker that has totals (Sportsbet often doesn't offer this market)
-    const totalsBookmaker = bookmakers.find((b) => b.markets?.some((m) => m.key === 'totals'))
-    const totals = totalsBookmaker?.markets?.find((m) => m.key === 'totals')
-    const totalsOutcomes = totals?.outcomes ?? []
 
     return {
+      competition: t.slug,
       match_id: e.id,
       home_team: e.home_team,
       away_team: e.away_team,
@@ -59,8 +58,8 @@ export async function getOdds(t: Tournament): Promise<OddsRow[]> {
       home_odds: h2hOutcomes.find((o) => o.name === e.home_team)?.price ?? null,
       away_odds: h2hOutcomes.find((o) => o.name === e.away_team)?.price ?? null,
       draw_odds: h2hOutcomes.find((o) => o.name === 'Draw')?.price ?? null,
-      over_odds: totalsOutcomes.find((o) => o.name === 'Over')?.price ?? null,
-      under_odds: totalsOutcomes.find((o) => o.name === 'Under')?.price ?? null,
+      over_odds: null,
+      under_odds: null,
       bookmaker: h2hBookmaker?.key ?? 'sportsbet',
       fetched_at: now,
     }
@@ -69,17 +68,18 @@ export async function getOdds(t: Tournament): Promise<OddsRow[]> {
   if (rows.length > 0) {
     await supabase
       .from('odds_cache')
-      .upsert(rows, { onConflict: 'match_id,bookmaker' })
+      .upsert(rows, { onConflict: 'competition,match_id,bookmaker' })
   }
 
   return rows
 }
 
-export async function getOddsByMatchId(matchId: string): Promise<OddsRow | null> {
+export async function getOddsByMatchId(t: Tournament, matchId: string): Promise<OddsRow | null> {
   const supabase = createAdminClient()
   const { data } = await supabase
     .from('odds_cache')
     .select('*')
+    .eq('competition', t.slug)
     .eq('match_id', matchId)
     .order('fetched_at', { ascending: false })
     .limit(1)

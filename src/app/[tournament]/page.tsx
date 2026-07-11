@@ -38,8 +38,8 @@ export default async function Dashboard({ params, searchParams }: Props) {
     t.youtubePlaylistId ? getPlaylistVideos(t.youtubePlaylistId) : Promise.resolve([] as YouTubeClip[]),
     getNews(t, 1),
     user ? supabase.from('user_profiles').select('wallet_balance').eq('id', user.id).single() : Promise.resolve({ data: null }),
-    user ? supabase.from('bets').select('*').eq('user_id', user.id).neq('status', 'void').order('placed_at', { ascending: false }).limit(10) : Promise.resolve({ data: null }),
-    user ? supabase.from('bets').select('stake').eq('user_id', user.id).eq('status', 'pending') : Promise.resolve({ data: [] }),
+    user ? supabase.from('bets').select('*').eq('user_id', user.id).eq('competition', t.slug).neq('status', 'void').order('placed_at', { ascending: false }).limit(10) : Promise.resolve({ data: null }),
+    user ? supabase.from('bets').select('stake').eq('user_id', user.id).eq('competition', t.slug).eq('status', 'pending') : Promise.resolve({ data: [] }),
   ])
 
   const balance = profileResult.data?.wallet_balance as number | null
