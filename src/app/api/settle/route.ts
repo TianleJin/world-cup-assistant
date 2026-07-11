@@ -67,6 +67,11 @@ export async function GET(request: NextRequest) {
         continue
       }
 
+      // NOTE: home/draw/away settles on the final match result (post extra-time/
+      // penalties), not the 90-minute score. This is a known, intentional mismatch
+      // with standard 1X2 convention (where a "Draw" price implies regulation time) —
+      // decided not worth the added complexity for a fake-money simulation. If this
+      // ever needs fixing, use match.score.regularTime instead of score.winner.
       const winner = match.score.winner
       // For PSO matches fullTime includes penalty goals; subtract them to get real goals
       const isPso = match.score.duration === 'PENALTY_SHOOTOUT'

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { UserRound, LogOut } from 'lucide-react'
+import { UserRound, LogOut, LogIn, UserPlus } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 
 export default function NavAuth({ user, balance }: { user: User | null; balance: number | null }) {
@@ -20,15 +20,19 @@ export default function NavAuth({ user, balance }: { user: User | null; balance:
       <div className="flex items-center gap-2">
         <Link
           href="/login"
-          className="text-sm text-slate-300 hover:text-white px-3 py-1.5 rounded-md"
+          aria-label="Sign in"
+          className="flex items-center text-slate-300 hover:text-white p-2 sm:px-3 sm:py-1.5 rounded-md"
         >
-          Sign in
+          <LogIn className="w-5 h-5 sm:hidden" />
+          <span className="hidden sm:inline text-sm">Sign in</span>
         </Link>
         <Link
           href="/register"
-          className="text-sm bg-amber-600 hover:bg-amber-500 text-white px-3 py-1.5 rounded-md transition-colors"
+          aria-label="Register"
+          className="flex items-center bg-amber-600 hover:bg-amber-500 text-white p-2 sm:px-3 sm:py-1.5 rounded-md transition-colors"
         >
-          Register
+          <UserPlus className="w-5 h-5 sm:hidden" />
+          <span className="hidden sm:inline text-sm">Register</span>
         </Link>
       </div>
     )
