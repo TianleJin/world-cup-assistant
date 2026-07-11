@@ -5,6 +5,7 @@ import { useState } from 'react'
 const MESSAGES: Record<string, string> = {
   bet_placed: 'Bet placed successfully! Good luck.',
   bet_cancelled: 'Bet cancelled and stake refunded.',
+  password_reset: 'Password updated. You are now signed in.',
 }
 
 export default function SuccessBanner({ type }: { type: string }) {

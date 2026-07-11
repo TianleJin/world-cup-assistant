@@ -3,6 +3,7 @@ import { getWorldCupNews } from '@/lib/news-api'
 import { getFifaChannelVideos, findMatchClips } from '@/lib/youtube'
 import { createClient } from '@/lib/supabase/server'
 import HomeMatchSection from '@/components/home-match-section'
+import SuccessBanner from '@/components/success-banner'
 import Link from 'next/link'
 import { Trophy, Calendar, Newspaper, TrendingUp } from 'lucide-react'
 import type { NewsArticle, Bet, Match } from '@/types'
@@ -10,7 +11,12 @@ import type { YouTubeClip } from '@/lib/youtube'
 
 export const dynamic = 'force-dynamic'
 
-export default async function Dashboard() {
+interface Props {
+  searchParams: Promise<{ success?: string }>
+}
+
+export default async function Dashboard({ searchParams }: Props) {
+  const { success } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -49,6 +55,8 @@ export default async function Dashboard() {
 
   return (
     <div className="space-y-10">
+      {success && <SuccessBanner type={success} />}
+
       {/* Hero */}
       <div className="text-center py-6">
         <h1 className="text-3xl sm:text-5xl font-bold tracking-tight mb-2">
