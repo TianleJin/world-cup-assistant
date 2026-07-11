@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getMatches } from '@/lib/football-data'
+import { getTournament } from '@/lib/tournaments'
 import { teamsMatch } from '@/lib/team-utils'
 import type { Match } from '@/types'
 
@@ -20,8 +21,8 @@ export async function GET(request: NextRequest) {
 
   const supabase = createAdminClient()
 
-  // 1. Pick the most recent finished match
-  const finished = await getMatches('FINISHED')
+  // 1. Pick the most recent finished match (World Cup — the only betting tournament)
+  const finished = await getMatches(getTournament('world-cup')!, 'FINISHED')
   const match: Match | undefined = finished.at(-1)
   if (!match) {
     return NextResponse.json({ error: 'No finished matches found yet' }, { status: 404 })

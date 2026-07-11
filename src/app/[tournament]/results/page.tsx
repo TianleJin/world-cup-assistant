@@ -1,15 +1,29 @@
 import { getMatches } from '@/lib/football-data'
-import { getFifaChannelVideos, findMatchClips } from '@/lib/youtube'
+import { getPlaylistVideos, findMatchClips } from '@/lib/youtube'
+import { getTournament, TOURNAMENTS } from '@/lib/tournaments'
 import MatchDayList from '@/components/match-day-list'
+import { notFound } from 'next/navigation'
 import type { Match } from '@/types'
 import type { YouTubeClip } from '@/lib/youtube'
 
 export const revalidate = 300
 
-export default async function ResultsPage() {
+export function generateStaticParams() {
+  return TOURNAMENTS.map((t) => ({ tournament: t.slug }))
+}
+
+interface Props {
+  params: Promise<{ tournament: string }>
+}
+
+export default async function ResultsPage({ params }: Props) {
+  const { tournament } = await params
+  const t = getTournament(tournament)
+  if (!t) notFound()
+
   const [matches, clips] = await Promise.all([
-    getMatches('FINISHED'),
-    getFifaChannelVideos(),
+    getMatches(t, 'FINISHED'),
+    t.youtubePlaylistId ? getPlaylistVideos(t.youtubePlaylistId) : Promise.resolve([] as YouTubeClip[]),
   ])
 
   const sorted = [...matches].sort(

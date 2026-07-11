@@ -8,9 +8,10 @@ interface Props {
   odds: OddsRow
   balance: number
   preselection?: string
+  tournamentSlug: string
 }
 
-export default function BetForm({ odds, balance, preselection }: Props) {
+export default function BetForm({ odds, balance, preselection, tournamentSlug }: Props) {
   const [state, action, pending] = useActionState(placeBetAction, null)
   const [selection, setSelection] = useState<'home' | 'draw' | 'away' | 'over' | 'under' | ''>(
     (preselection as 'home' | 'draw' | 'away' | 'over' | 'under') || ''
@@ -45,6 +46,7 @@ export default function BetForm({ odds, balance, preselection }: Props) {
   return (
     <form action={action} className="space-y-5">
       {/* Hidden fields */}
+      <input type="hidden" name="tournament" value={tournamentSlug} />
       <input type="hidden" name="odds_match_id" value={odds.match_id} />
       <input type="hidden" name="home_team" value={odds.home_team} />
       <input type="hidden" name="away_team" value={odds.away_team} />

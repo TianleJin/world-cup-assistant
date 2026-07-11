@@ -1,18 +1,23 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { useActiveTournament } from '@/lib/use-active-tournament'
 
-const links = [
-  { href: '/standings', label: 'Bracket' },
-  { href: '/results', label: 'Results' },
-  { href: '/schedule', label: 'Schedule' },
-  { href: '/news', label: 'News' },
-  { href: '/odds', label: 'Odds' },
-]
+function buildLinks(slug: string, standingsLabel: string, betting: boolean) {
+  return [
+    { href: `/${slug}/standings`, label: standingsLabel },
+    { href: `/${slug}/results`, label: 'Results' },
+    { href: `/${slug}/schedule`, label: 'Schedule' },
+    { href: `/${slug}/news`, label: 'News' },
+    ...(betting ? [{ href: `/${slug}/odds`, label: 'Odds' }] : []),
+  ]
+}
 
 export function NavDesktopLinks() {
-  const pathname = usePathname()
+  const { pathname, tournament } = useActiveTournament()
+  if (!tournament) return null
+  const links = buildLinks(tournament.slug, tournament.standingsLabel, tournament.betting)
+
   return (
     <div className="hidden md:flex items-center gap-1">
       {links.map(({ href, label }) => {
@@ -36,7 +41,10 @@ export function NavDesktopLinks() {
 }
 
 export function NavMobileLinks() {
-  const pathname = usePathname()
+  const { pathname, tournament } = useActiveTournament()
+  if (!tournament) return null
+  const links = buildLinks(tournament.slug, tournament.standingsLabel, tournament.betting)
+
   return (
     <div className="md:hidden border-t border-white/[0.08] flex overflow-x-auto">
       {links.map(({ href, label }) => {

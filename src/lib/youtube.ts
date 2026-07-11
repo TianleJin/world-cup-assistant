@@ -1,7 +1,5 @@
 import { normalizeTeamName } from '@/lib/team-utils'
 
-const PLAYLIST_ID = 'PLNuJDkj3zBvPVhoKC6Oq8j4w7AH9l-ejG'
-
 export interface YouTubeClip {
   id: string
   title: string
@@ -9,9 +7,11 @@ export interface YouTubeClip {
   url: string
 }
 
-export async function getFifaChannelVideos(): Promise<YouTubeClip[]> {
+// Fetch highlight clips from a tournament's YouTube playlist. Tournaments without
+// a playlist (playlistId undefined) get no highlights — callers should skip the call.
+export async function getPlaylistVideos(playlistId: string | undefined): Promise<YouTubeClip[]> {
   const apiKey = process.env.YOUTUBE_API_KEY
-  if (!apiKey) return []
+  if (!apiKey || !playlistId) return []
 
   const clips: YouTubeClip[] = []
   let pageToken: string | undefined
@@ -19,7 +19,7 @@ export async function getFifaChannelVideos(): Promise<YouTubeClip[]> {
   do {
     const url = new URL('https://www.googleapis.com/youtube/v3/playlistItems')
     url.searchParams.set('part', 'snippet')
-    url.searchParams.set('playlistId', PLAYLIST_ID)
+    url.searchParams.set('playlistId', playlistId)
     url.searchParams.set('maxResults', '50')
     url.searchParams.set('key', apiKey)
     if (pageToken) url.searchParams.set('pageToken', pageToken)

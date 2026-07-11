@@ -1,10 +1,15 @@
 import type { OddsRow } from '@/types'
+import type { Tournament } from '@/lib/tournaments'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 const BASE = 'https://api.the-odds-api.com/v4'
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000 // 6 hours
 
-export async function getWorldCupOdds(): Promise<OddsRow[]> {
+// NOTE: odds_cache has no competition column, so this cache is global. That is
+// only safe while a single tournament (the World Cup) has betting enabled. Before
+// enabling betting on a second tournament, add a competition column to odds_cache
+// (and its conflict key) and filter by it here. See the plan's "Deferred" section.
+export async function getOdds(t: Tournament): Promise<OddsRow[]> {
   const supabase = createAdminClient()
   const since = new Date(Date.now() - CACHE_TTL_MS).toISOString()
 
@@ -18,7 +23,7 @@ export async function getWorldCupOdds(): Promise<OddsRow[]> {
   if (cached && cached.length > 0) return cached as OddsRow[]
 
   // Fetch fresh odds from The Odds API
-  const sport = process.env.ODDS_API_SPORT_KEY ?? 'soccer_fifa_world_cup'
+  const sport = t.oddsSportKey ?? 'soccer_fifa_world_cup'
   const params = new URLSearchParams({
     apiKey: process.env.ODDS_API_KEY!,
     regions: 'au',

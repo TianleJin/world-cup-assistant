@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getMatches } from '@/lib/football-data'
+import { getTournament } from '@/lib/tournaments'
 import { teamsMatch } from '@/lib/team-utils'
 import type { Match, Bet } from '@/types'
 
@@ -29,8 +30,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ settled: 0, message: 'No pending bets to settle' })
   }
 
-  // Fetch recently finished matches
-  const finishedMatches = await getMatches('FINISHED')
+  // Fetch recently finished matches. Only the World Cup has betting enabled today,
+  // so all bets settle against WC results. When a second tournament gets betting,
+  // tag bets with their competition and settle per-competition (see plan "Deferred").
+  const worldCup = getTournament('world-cup')!
+  const finishedMatches = await getMatches(worldCup, 'FINISHED')
   let settled = 0
   const errors: string[] = []
 

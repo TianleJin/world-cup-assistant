@@ -1,10 +1,14 @@
 import type { NewsArticle } from '@/types'
+import type { Tournament } from '@/lib/tournaments'
 
 const BASE = 'https://newsapi.org/v2'
 
-export async function getWorldCupNews(page = 1): Promise<{ articles: NewsArticle[]; totalResults: number }> {
+export async function getNews(
+  t: Tournament,
+  page = 1
+): Promise<{ articles: NewsArticle[]; totalResults: number }> {
   const params = new URLSearchParams({
-    q: '"FIFA World Cup 2026" OR ("World Cup 2026" AND (soccer OR football OR FIFA OR goal OR match))',
+    q: t.news.query,
     language: 'en',
     sortBy: 'publishedAt',
     pageSize: '40', // fetch more so we have enough after filtering
@@ -23,17 +27,24 @@ export async function getWorldCupNews(page = 1): Promise<{ articles: NewsArticle
 
   const data = await res.json()
 
-  const KEYWORDS = [
-    'world cup', 'fifa', 'football', 'soccer', 'goal', 'match', 'stadium',
-    'squad', 'player', 'team', 'manager', 'coach', 'injury', 'qualifier',
-    'knockout', 'group stage', 'penalty', 'semifinal', 'final',
-  ]
+  const keywords = t.news.keywords
+  const exclude = t.news.exclude ?? []
+  // Whole-word matcher so short blocklist tokens (ipl, odi, t20) don't match
+  // inside unrelated words like "multiple" or "podium".
+  const excludeRe = exclude.length
+    ? new RegExp(`\\b(${exclude.map(escapeRegExp).join('|')})\\b`, 'i')
+    : null
 
   const articles = (data.articles ?? []).filter((a: NewsArticle) => {
     if (a.title === '[Removed]' || a.url === 'https://removed.com') return false
     const text = `${a.title} ${a.description ?? ''}`.toLowerCase()
-    return KEYWORDS.some((kw) => text.includes(kw))
+    if (excludeRe && excludeRe.test(text)) return false
+    return keywords.some((kw) => text.includes(kw))
   })
 
   return { articles: articles.slice(0, 20), totalResults: data.totalResults ?? 0 }
+}
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }

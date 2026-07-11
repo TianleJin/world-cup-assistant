@@ -5,7 +5,8 @@ import type { YouTubeClip } from '@/lib/youtube'
 
 interface Props {
   match: Match
-  showBetLink?: boolean
+  /** When set, renders a "View Odds & Bet" link to this URL for upcoming matches */
+  oddsHref?: string
   clips?: YouTubeClip[]
 }
 
@@ -27,7 +28,7 @@ const STAGE_NICE_LABELS: Record<string, string> = {
   FINAL: 'Final',
 }
 
-export default function MatchCard({ match, showBetLink, clips }: Props) {
+export default function MatchCard({ match, oddsHref, clips }: Props) {
   const isLive = match.status === 'IN_PLAY' || match.status === 'PAUSED'
   const isFinished = match.status === 'FINISHED'
   const hasScore = isLive || isFinished
@@ -128,9 +129,9 @@ export default function MatchCard({ match, showBetLink, clips }: Props) {
           </div>
         )}
 
-        {showBetLink && !isFinished && match.status !== 'POSTPONED' && match.status !== 'CANCELLED' && (
+        {oddsHref && !isFinished && match.status !== 'POSTPONED' && match.status !== 'CANCELLED' && (
           <Link
-            href={`/odds`}
+            href={oddsHref}
             className="text-xs border border-amber-600 text-amber-400 hover:bg-amber-600 hover:text-white rounded-md px-3 py-1.5 transition-colors text-center"
           >
             View Odds & Bet

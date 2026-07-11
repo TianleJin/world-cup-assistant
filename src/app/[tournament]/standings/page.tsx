@@ -1,8 +1,14 @@
 import { getStandings, getScorers, getMatches } from '@/lib/football-data'
+import { getTournament, TOURNAMENTS } from '@/lib/tournaments'
 import LocalTime from '@/components/local-time'
+import { notFound } from 'next/navigation'
 import type { Match, Standing, StandingRow } from '@/types'
 
 export const revalidate = 300
+
+export function generateStaticParams() {
+  return TOURNAMENTS.map((t) => ({ tournament: t.slug }))
+}
 
 const KNOCKOUT_STAGES: { key: string; label: string }[] = [
   { key: 'LAST_32', label: 'Round of 32' },
@@ -13,26 +19,89 @@ const KNOCKOUT_STAGES: { key: string; label: string }[] = [
   { key: 'FINAL', label: 'Final' },
 ]
 
-export default async function StandingsPage() {
+interface Props {
+  params: Promise<{ tournament: string }>
+}
+
+export default async function StandingsPage({ params }: Props) {
+  const { tournament } = await params
+  const t = getTournament(tournament)
+  if (!t) notFound()
+
+  const isCup = t.format === 'cup'
+
   const [standings, scorersData, allMatches] = await Promise.all([
-    getStandings(),
-    getScorers(),
-    getMatches(),
+    getStandings(t),
+    getScorers(t),
+    isCup ? getMatches(t) : Promise.resolve([] as Match[]),
   ])
 
   const scorers = scorersData.scorers ?? []
-  const knockoutMatches = (allMatches as Match[]).filter(m => m.stage !== 'GROUP_STAGE')
 
   if (standings.length === 0) {
     return (
       <div className="text-center py-20 text-slate-400">
-        Standings not yet available.
+        {t.standingsLabel} not yet available.
       </div>
     )
   }
 
   // Only show TOTAL type — API also returns HOME and AWAY breakdowns
   const totalOnly = standings.filter((s: Standing) => s.type === 'TOTAL')
+
+  const scorersSection = scorers.length > 0 && (
+    <section>
+      <h2 className="text-xl font-bold mb-4 border-l-2 border-l-amber-500 pl-3">Top Scorers</h2>
+      <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-slate-700 text-slate-400 text-xs">
+              <th className="text-left px-4 py-3">#</th>
+              <th className="text-left px-4 py-3">Player</th>
+              <th className="text-left px-4 py-3">Team</th>
+              <th className="text-right px-4 py-3">Goals</th>
+              <th className="text-right px-4 py-3">Assists</th>
+            </tr>
+          </thead>
+          <tbody>
+            {scorers.slice(0, 10).map((s: { player: { id: number; name: string }; team: { crest: string; shortName?: string; name: string }; goals: number; assists: number | null }, i: number) => (
+              <tr key={s.player.id} className="border-b border-slate-700/50 hover:bg-slate-700/30">
+                <td className="px-4 py-3 text-slate-400">{i + 1}</td>
+                <td className="px-4 py-3 font-medium">{s.player.name}</td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={s.team.crest} alt="" className="w-4 h-4 object-contain" />
+                    <span className="text-slate-300">{s.team.shortName ?? s.team.name}</span>
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-right font-bold text-amber-400">{s.goals}</td>
+                <td className="px-4 py-3 text-right text-slate-400">{s.assists ?? 0}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  )
+
+  // League format: a single standings table, no groups/bracket.
+  if (!isCup) {
+    return (
+      <div className="space-y-8">
+        <h1 className="text-2xl font-bold">{t.standingsLabel}</h1>
+        <div className="space-y-6">
+          {totalOnly.map((s: Standing) => (
+            <GroupTable key={`${s.stage}-${s.type}`} standing={s} />
+          ))}
+        </div>
+        {scorersSection}
+      </div>
+    )
+  }
+
+  // Cup format: group tables + knockout bracket.
+  const knockoutMatches = (allMatches as Match[]).filter(m => m.stage !== 'GROUP_STAGE')
   const groupStandings = totalOnly.filter((s: Standing) => !!s.group)
   const hasGroups = groupStandings.length > 0
   const knockoutUnderway = knockoutMatches.some(m => m.status === 'FINISHED' || m.status === 'IN_PLAY' || m.status === 'PAUSED')
@@ -71,7 +140,7 @@ export default async function StandingsPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold">Bracket</h1>
+      <h1 className="text-2xl font-bold">{t.standingsLabel}</h1>
 
       {knockoutUnderway ? (
         <>
@@ -88,42 +157,7 @@ export default async function StandingsPage() {
         </>
       )}
 
-      {/* Top scorers */}
-      {scorers.length > 0 && (
-        <section>
-          <h2 className="text-xl font-bold mb-4 border-l-2 border-l-amber-500 pl-3">Top Scorers</h2>
-          <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-700 text-slate-400 text-xs">
-                  <th className="text-left px-4 py-3">#</th>
-                  <th className="text-left px-4 py-3">Player</th>
-                  <th className="text-left px-4 py-3">Team</th>
-                  <th className="text-right px-4 py-3">Goals</th>
-                  <th className="text-right px-4 py-3">Assists</th>
-                </tr>
-              </thead>
-              <tbody>
-                {scorers.slice(0, 10).map((s: { player: { id: number; name: string }; team: { crest: string; shortName?: string; name: string }; goals: number; assists: number | null }, i: number) => (
-                  <tr key={s.player.id} className="border-b border-slate-700/50 hover:bg-slate-700/30">
-                    <td className="px-4 py-3 text-slate-400">{i + 1}</td>
-                    <td className="px-4 py-3 font-medium">{s.player.name}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={s.team.crest} alt="" className="w-4 h-4 object-contain" />
-                        <span className="text-slate-300">{s.team.shortName ?? s.team.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-right font-bold text-amber-400">{s.goals}</td>
-                    <td className="px-4 py-3 text-right text-slate-400">{s.assists ?? 0}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
+      {scorersSection}
     </div>
   )
 }

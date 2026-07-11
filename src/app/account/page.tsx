@@ -79,7 +79,7 @@ export default async function AccountPage({ searchParams }: Props) {
               <span className="ml-2 text-sm font-normal text-slate-400">({pending.length})</span>
             )}
           </h2>
-          <Link href="/odds" className="text-sm text-amber-500 hover:text-amber-400">
+          <Link href="/world-cup/odds" className="text-sm text-amber-500 hover:text-amber-400">
             Place a bet →
           </Link>
         </div>

@@ -1,15 +1,29 @@
-import { getWorldCupNews } from '@/lib/news-api'
+import { getNews } from '@/lib/news-api'
+import { getTournament, TOURNAMENTS } from '@/lib/tournaments'
+import { notFound } from 'next/navigation'
 import type { NewsArticle } from '@/types'
 
 export const revalidate = 900 // 15 min
 
-export default async function NewsPage() {
-  const { articles, totalResults } = await getWorldCupNews(1)
+export function generateStaticParams() {
+  return TOURNAMENTS.map((t) => ({ tournament: t.slug }))
+}
+
+interface Props {
+  params: Promise<{ tournament: string }>
+}
+
+export default async function NewsPage({ params }: Props) {
+  const { tournament } = await params
+  const t = getTournament(tournament)
+  if (!t) notFound()
+
+  const { articles, totalResults } = await getNews(t, 1)
 
   return (
     <div className="space-y-6">
       <div className="flex items-baseline justify-between">
-        <h1 className="text-2xl font-bold">World Cup News</h1>
+        <h1 className="text-2xl font-bold">{t.shortName} News</h1>
         <p className="text-sm text-slate-400">Updates every 15 minutes</p>
       </div>
 

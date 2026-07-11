@@ -20,6 +20,7 @@ export async function placeBetAction(
 
   if (!user) redirect('/login')
 
+  const tournamentSlug = (formData.get('tournament') as string) || 'world-cup'
   const oddsMatchId = formData.get('odds_match_id') as string
   const homeTeam = formData.get('home_team') as string
   const awayTeam = formData.get('away_team') as string
@@ -66,7 +67,7 @@ export async function placeBetAction(
 
   revalidatePath('/account')
   revalidatePath('/')
-  redirect(`/odds?success=bet_placed`)
+  redirect(`/${tournamentSlug}/odds?success=bet_placed`)
 }
 
 export async function changePasswordAction(

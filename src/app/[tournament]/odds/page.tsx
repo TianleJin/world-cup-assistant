@@ -1,10 +1,13 @@
-import { getWorldCupOdds } from '@/lib/odds-api'
+import { getOdds } from '@/lib/odds-api'
 import { getMatches } from '@/lib/football-data'
+import { getTournament } from '@/lib/tournaments'
 import { createClient } from '@/lib/supabase/server'
 import { teamsMatch } from '@/lib/team-utils'
 import { getFlagUrl } from '@/lib/flags'
 import Link from 'next/link'
 import LocalTime from '@/components/local-time'
+import SuccessBanner from '@/components/success-banner'
+import { notFound } from 'next/navigation'
 import type { OddsRow, Match } from '@/types'
 
 export const dynamic = 'force-dynamic'
@@ -38,10 +41,22 @@ function findFixture(o: OddsRow, matches: Match[]): Match | undefined {
   })
 }
 
-export default async function OddsPage() {
+interface Props {
+  params: Promise<{ tournament: string }>
+  searchParams: Promise<{ success?: string }>
+}
+
+export default async function OddsPage({ params, searchParams }: Props) {
+  const { tournament } = await params
+  const { success } = await searchParams
+  const t = getTournament(tournament)
+  if (!t || !t.betting) notFound()
+
+  const base = `/${t.slug}`
+
   const [odds, matches, supabase] = await Promise.all([
-    getWorldCupOdds(),
-    getMatches(),
+    getOdds(t),
+    getMatches(t),
     createClient(),
   ])
 
@@ -56,6 +71,8 @@ export default async function OddsPage() {
 
   return (
     <div className="space-y-6">
+      {success && <SuccessBanner type={success} />}
+
       <div className="flex items-baseline justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-2xl font-bold">Betting Odds</h1>
@@ -94,7 +111,7 @@ export default async function OddsPage() {
         {upcoming.map((o: OddsRow) => {
           const fixture = findFixture(o, matches)
           return (
-            <OddsCard key={o.match_id} odds={o} fixture={fixture} user={user} />
+            <OddsCard key={o.match_id} odds={o} fixture={fixture} user={user} base={base} />
           )
         })}
       </div>
@@ -106,10 +123,12 @@ function OddsCard({
   odds,
   fixture,
   user,
+  base,
 }: {
   odds: OddsRow
   fixture: Match | undefined
   user: { id: string } | null
+  base: string
 }) {
   const stageLabel = getStageLabel(fixture)
 
@@ -139,6 +158,7 @@ function OddsCard({
           matchId={odds.match_id}
           selection="home"
           user={user}
+          base={base}
         />
         {odds.draw_odds && (
           <OddsButton
@@ -148,6 +168,7 @@ function OddsCard({
             matchId={odds.match_id}
             selection="draw"
             user={user}
+            base={base}
           />
         )}
         <OddsButton
@@ -157,6 +178,7 @@ function OddsCard({
           matchId={odds.match_id}
           selection="away"
           user={user}
+          base={base}
         />
       </div>
 
@@ -172,6 +194,7 @@ function OddsCard({
               matchId={odds.match_id}
               selection="over"
               user={user}
+              base={base}
             />
             <OddsButton
               label="Under 2.5"
@@ -180,6 +203,7 @@ function OddsCard({
               matchId={odds.match_id}
               selection="under"
               user={user}
+              base={base}
             />
           </div>
         </div>
@@ -216,6 +240,7 @@ function OddsButton({
   matchId,
   selection,
   user,
+  base,
 }: {
   label: string
   sublabel: string
@@ -223,6 +248,7 @@ function OddsButton({
   matchId: string
   selection: string
   user: { id: string } | null
+  base: string
 }) {
   if (!price) {
     return (
@@ -233,7 +259,7 @@ function OddsButton({
     )
   }
 
-  const href = user ? `/bet/${matchId}?selection=${selection}` : `/login?redirected=1`
+  const href = user ? `${base}/bet/${matchId}?selection=${selection}` : `/login?redirected=1`
 
   return (
     <Link

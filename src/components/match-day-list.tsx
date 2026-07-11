@@ -7,11 +7,11 @@ import type { YouTubeClip } from '@/lib/youtube'
 
 interface Props {
   matches: Match[]
-  showBetLink?: boolean
+  oddsHref?: string
   highlights?: Record<number, YouTubeClip[]>
 }
 
-export default function MatchDayList({ matches, showBetLink, highlights }: Props) {
+export default function MatchDayList({ matches, oddsHref, highlights }: Props) {
   const [groups, setGroups] = useState<{ label: string; matches: Match[] }[]>([])
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export default function MatchDayList({ matches, showBetLink, highlights }: Props
               <div className="flex-1 h-px bg-slate-700/70" />
             </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {dayMatches.map((m) => <MatchCard key={m.id} match={m} showBetLink={showBetLink} clips={highlights?.[m.id]} />)}
+              {dayMatches.map((m) => <MatchCard key={m.id} match={m} oddsHref={oddsHref} clips={highlights?.[m.id]} />)}
             </div>
           </section>
         ))}
@@ -62,7 +62,7 @@ export default function MatchDayList({ matches, showBetLink, highlights }: Props
             <div className="flex-1 h-px bg-slate-700/70" />
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {dayMatches.map((m) => <MatchCard key={m.id} match={m} showBetLink={showBetLink} clips={highlights?.[m.id]} />)}
+            {dayMatches.map((m) => <MatchCard key={m.id} match={m} oddsHref={oddsHref} clips={highlights?.[m.id]} />)}
           </div>
         </section>
       ))}

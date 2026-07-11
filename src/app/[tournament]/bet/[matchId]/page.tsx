@@ -1,22 +1,27 @@
 import { getOddsByMatchId } from '@/lib/odds-api'
+import { getTournament } from '@/lib/tournaments'
 import { createClient } from '@/lib/supabase/server'
 import { cancelBetAction } from '@/app/actions'
 import BetForm from '@/components/bet-form'
 import LocalTime from '@/components/local-time'
 import SuccessBanner from '@/components/success-banner'
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
+import { redirect, notFound } from 'next/navigation'
 import type { Bet } from '@/types'
 
 export const dynamic = 'force-dynamic'
 
 interface Props {
-  params: Promise<{ matchId: string }>
+  params: Promise<{ tournament: string; matchId: string }>
   searchParams: Promise<{ selection?: string; success?: string }>
 }
 
 export default async function BetPage({ params, searchParams }: Props) {
-  const { matchId } = await params
+  const { tournament, matchId } = await params
+  const t = getTournament(tournament)
+  if (!t || !t.betting) notFound()
+
+  const base = `/${t.slug}`
   const { selection, success } = await searchParams
 
   const supabase = await createClient()
@@ -42,7 +47,7 @@ export default async function BetPage({ params, searchParams }: Props) {
         <p className="text-sm text-slate-500">
           The odds may have expired or the match is no longer available.
         </p>
-        <Link href="/odds" className="text-amber-500 hover:text-amber-400 text-sm">
+        <Link href={`${base}/odds`} className="text-amber-500 hover:text-amber-400 text-sm">
           ← Back to odds
         </Link>
       </div>
@@ -54,7 +59,7 @@ export default async function BetPage({ params, searchParams }: Props) {
 
   return (
     <div className="max-w-lg mx-auto space-y-6">
-      <Link href="/odds" className="text-sm text-slate-400 hover:text-slate-200 flex items-center gap-1">
+      <Link href={`${base}/odds`} className="text-sm text-slate-400 hover:text-slate-200 flex items-center gap-1">
         ← Back to odds
       </Link>
 
@@ -78,7 +83,7 @@ export default async function BetPage({ params, searchParams }: Props) {
       ) : (
         <div className="bg-slate-800 border border-slate-700 rounded-xl p-5">
           <h2 className="font-semibold mb-4">Place a Bet</h2>
-          <BetForm odds={odds} balance={balance} preselection={selection} />
+          <BetForm odds={odds} balance={balance} preselection={selection} tournamentSlug={t.slug} />
         </div>
       )}
 
@@ -115,7 +120,7 @@ export default async function BetPage({ params, searchParams }: Props) {
                 {canCancel && (
                   <form action={cancelBetAction}>
                     <input type="hidden" name="bet_id" value={b.id} />
-                    <input type="hidden" name="redirect_to" value={`/bet/${matchId}`} />
+                    <input type="hidden" name="redirect_to" value={`${base}/bet/${matchId}`} />
                     <button
                       type="submit"
                       className="w-full text-xs text-slate-300 hover:text-white border border-slate-500 hover:border-slate-300 bg-slate-800/60 px-2.5 py-1.5 rounded-md transition-colors"

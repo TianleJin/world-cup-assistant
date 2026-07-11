@@ -7,8 +7,8 @@ const inter = Inter({ subsets: ['latin'] })
 const russoOne = Russo_One({ subsets: ['latin'], weight: '400', variable: '--font-russo' })
 
 export const metadata: Metadata = {
-  title: 'World Cup 2026',
-  description: 'Live scores, standings, news, and betting simulation for FIFA World Cup 2026',
+  title: 'FootyHQ — Football Tournament Assistant',
+  description: 'Live scores, standings, news, and betting simulation across major football tournaments',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Nav />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">{children}</main>
         <footer className="border-t border-slate-800 py-6 text-center text-xs text-slate-600 mt-8">
-          WC 2026 · Live data from football-data.org · Odds provided by Sportsbet · For entertainment only
+          FootyHQ · Live data from football-data.org · Odds provided by Sportsbet · For entertainment only
         </footer>
       </body>
     </html>
