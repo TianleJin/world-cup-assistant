@@ -97,12 +97,7 @@ export default async function OddsPage({ params, searchParams }: Props) {
         <div className="text-slate-400 text-sm space-y-2">
           <p>No upcoming match odds available.</p>
           <p className="text-slate-500">
-            Check that your <code className="text-slate-300">ODDS_API_KEY</code> and{' '}
-            <code className="text-slate-300">ODDS_API_SPORT_KEY</code> are correct. You can
-            list available sport keys at:{' '}
-            <code className="text-slate-300">
-              https://api.the-odds-api.com/v4/sports/?apiKey=YOUR_KEY
-            </code>
+            Odds will appear here once bookmakers publish them. Check back soon.
           </p>
         </div>
       )}
